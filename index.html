@@ -2,224 +2,219 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#000000">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f16">
 <meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PMP Snap">
-<title>PMP Snap</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<title>PMP Snap — study</title>
 <style>
-  /* Layout: full-bleed live camera. Glass status pill and gear on top, a glass answer panel above one big glass Answer button. */
+  /* PMP Snap: snap a PMP practice question, get the answer with a one-line reason, and keep a review list. */
   :root {
-    --text: #ffffff;
-    --text-dim: rgba(255, 255, 255, 0.72);
-    --accent: #0a84ff;
-    --ok: #30d158;
-    --warn: #ffd60a;
-    --bad: #ff453a;
-    --hairline: rgba(255, 255, 255, 0.28);
-    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Helvetica Neue", Arial, sans-serif;
-    --round: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-    --safe-b: max(16px, env(safe-area-inset-bottom));
+    --bg: #0b0f16; --card: rgba(255,255,255,0.06); --card2: rgba(255,255,255,0.10); --line: rgba(255,255,255,0.12);
+    --text: #fff; --dim: rgba(255,255,255,0.66); --accent: #0a84ff; --ok: #30d158; --bad: #ff6b60;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+    --round: ui-rounded, "SF Pro Rounded", -apple-system, system-ui, sans-serif;
+    --st: env(safe-area-inset-top, 0px); --sb: env(safe-area-inset-bottom, 0px);
+    --sl: env(safe-area-inset-left, 0px); --sr: env(safe-area-inset-right, 0px);
     color-scheme: dark;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; margin: 0; background: #000; }
-  body {
-    position: fixed; inset: 0; overflow: hidden;
-    font-family: var(--font); color: var(--text);
-    -webkit-user-select: none; user-select: none; touch-action: manipulation; overscroll-behavior: none;
-  }
+  html, body { margin: 0; min-height: 100%; background: var(--bg); }
+  body { font-family: var(--font); color: var(--text); -webkit-text-size-adjust: 100%; overscroll-behavior-y: contain;
+    background: radial-gradient(120% 60% at 100% 0%, rgba(10,132,255,0.16), transparent 60%), var(--bg); }
   button { font: inherit; color: inherit; }
+  .hidden { display: none !important; }
 
-  /* Glass material */
-  .glass {
-    position: relative;
-    background: linear-gradient(160deg, rgba(255,255,255,0.20), rgba(255,255,255,0.05) 55%), rgba(20, 24, 30, 0.30);
-    -webkit-backdrop-filter: blur(26px) saturate(190%);
-    backdrop-filter: blur(26px) saturate(190%);
-    border: 1px solid var(--hairline);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(255,255,255,0.08);
-  }
+  header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between;
+    padding: calc(var(--st) + 12px) calc(var(--sr) + 16px) 10px calc(var(--sl) + 26px);
+    background: linear-gradient(var(--bg) 70%, transparent); }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 19px; letter-spacing: -0.02em; }
+  .brand img { width: 30px; height: 30px; border-radius: 8px; }
+  .brand small { font-weight: 600; font-size: 12px; color: var(--dim); background: var(--card2); padding: 3px 8px; border-radius: 10px; }
+  .iconbtn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); display: grid; place-items: center; cursor: pointer; padding: 0; }
+  .iconbtn svg { width: 21px; height: 21px; }
 
-  video#cam { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #05080b; }
-  .shade { position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.45), transparent 20%, transparent 58%, rgba(0,0,0,0.58)); }
-  .frame { position: absolute; inset: 14% 8% 34% 8%; pointer-events: none; }
-  .frame i { position: absolute; width: 30px; height: 30px; border: 0 solid rgba(255,255,255,0.7); }
-  .frame i:nth-child(1) { top: 0; left: 0; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 10px; }
-  .frame i:nth-child(2) { top: 0; right: 0; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 10px; }
-  .frame i:nth-child(3) { bottom: 0; left: 0; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 10px; }
-  .frame i:nth-child(4) { bottom: 0; right: 0; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 10px; }
+  main { padding: 4px calc(var(--sr) + 16px) calc(var(--sb) + 230px) calc(var(--sl) + 26px); max-width: 640px; margin: 0 auto; }
 
-  /* Top bar */
-  .top {
-    position: absolute; top: 0; left: 0; right: 0; z-index: 5;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
-  }
-  .pill { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 20px; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
-  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--warn); box-shadow: 0 0 10px currentColor; color: var(--warn); }
-  .dot.ok { background: var(--ok); color: var(--ok); }
-  .dot.bad { background: var(--bad); color: var(--bad); }
-  .round { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; padding: 0; }
-  .round svg { width: 22px; height: 22px; }
+  /* Current result */
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 16px; }
+  .empty { text-align: center; padding: 34px 20px; }
+  .empty h2 { margin: 6px 0 8px; font-size: 21px; letter-spacing: -0.02em; }
+  .empty p { margin: 0 auto; color: var(--dim); line-height: 1.5; font-size: 15px; max-width: 330px; }
+  .empty .hint { margin-top: 18px; font-size: 13px; }
+  .result .top { display: flex; gap: 12px; align-items: flex-start; }
+  .thumb { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; flex: none; border: 1px solid var(--line); background: #111; }
+  .q { font-size: 14px; color: var(--dim); line-height: 1.4; margin-top: 2px; }
+  .ans { display: flex; align-items: center; gap: 16px; margin: 14px 0 4px; }
+  .letter { font-family: var(--round); font-weight: 750; font-size: 64px; line-height: 1; min-width: 64px; height: 76px; padding: 0 12px;
+    display: grid; place-items: center; border-radius: 20px; background: linear-gradient(160deg, rgba(10,132,255,0.55), rgba(10,132,255,0.25)); border: 1px solid rgba(255,255,255,0.25); }
+  .letter.multi { font-size: 38px; }
+  .reason { font-size: 17px; line-height: 1.4; font-weight: 600; letter-spacing: -0.01em; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .chip { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; background: var(--card2); color: var(--dim); }
+  details.others { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+  details.others summary { cursor: pointer; font-size: 14px; font-weight: 600; color: #7cc0ff; list-style: none; }
+  details.others summary::-webkit-details-marker { display: none; }
+  details.others summary::after { content: " ›"; }
+  details.others[open] summary::after { content: " ⌄"; }
+  .other { display: flex; gap: 10px; font-size: 14px; line-height: 1.4; color: var(--dim); margin-top: 8px; }
+  .other b { color: var(--text); min-width: 18px; }
+  .meta { margin-top: 10px; font-size: 12px; color: var(--dim); }
+  .loading { display: flex; align-items: center; gap: 14px; padding: 8px 2px; }
+  .dots { display: flex; gap: 7px; } .dots span { width: 10px; height: 10px; border-radius: 50%; background: #fff; opacity: 0.3; animation: pulse 1.1s ease-in-out infinite; }
+  .dots span:nth-child(2) { animation-delay: .15s; } .dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes pulse { 0%,100% { opacity: .25; transform: scale(.8); } 40% { opacity: 1; transform: scale(1.1); } }
+  .err { color: var(--bad); font-weight: 600; line-height: 1.45; }
 
-  /* Answer panel */
-  .panel {
-    position: absolute; z-index: 5; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: calc(100% - 48px);
-    bottom: calc(var(--safe-b) + 76px + 18px);
-    min-width: 148px; padding: 14px 32px 12px; border-radius: 36px; text-align: center; cursor: pointer;
-    opacity: 0; transform: translateY(14px) scale(0.96); pointer-events: none;
-    transition: opacity 0.22s ease, transform 0.32s cubic-bezier(0.2, 0.9, 0.25, 1.1);
-  }
-  .panel.show { opacity: 1; transform: none; pointer-events: auto; }
-  .letter { font-family: var(--round); font-weight: 700; font-size: 108px; line-height: 1.02; letter-spacing: -0.02em; text-shadow: 0 2px 18px rgba(0,0,0,0.35); font-variant-numeric: tabular-nums; }
-  .letter.multi { font-size: 64px; line-height: 1.2; }
-  .letter[hidden], .msg[hidden], .loader[hidden], .meta[hidden] { display: none; }
-  .meta { margin-top: 2px; font-size: 13px; color: var(--text-dim); font-weight: 500; }
-  .msg { font-size: 17px; line-height: 1.35; font-weight: 600; padding: 6px 4px 8px; max-width: 300px; text-wrap: balance; }
-  .msg.bad { color: #ffb4ae; }
-  .loader { display: flex; gap: 9px; justify-content: center; align-items: center; height: 80px; }
-  .loader span { width: 13px; height: 13px; border-radius: 50%; background: #fff; opacity: 0.35; animation: pulse 1.1s ease-in-out infinite; }
-  .loader span:nth-child(2) { animation-delay: 0.16s; }
-  .loader span:nth-child(3) { animation-delay: 0.32s; }
-  @keyframes pulse { 0%, 100% { opacity: 0.25; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1.1); } }
+  /* Review list */
+  .section { display: flex; align-items: baseline; gap: 10px; margin: 22px 4px 8px; }
+  .section h3 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim); }
+  .section span { font-size: 13px; color: var(--dim); }
+  .hist { display: flex; flex-direction: column; gap: 8px; }
+  .hitem { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; cursor: pointer; }
+  .hitem .row { display: flex; align-items: center; gap: 12px; }
+  .hitem .hl { font-family: var(--round); font-weight: 750; font-size: 20px; min-width: 40px; height: 40px; padding: 0 8px; border-radius: 11px; display: grid; place-items: center; background: rgba(10,132,255,0.28); }
+  .hitem .ht { flex: 1; min-width: 0; }
+  .hitem .hq { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hitem .hs { font-size: 12px; color: var(--dim); margin-top: 2px; }
+  .hitem .hr { display: none; margin-top: 10px; font-size: 14px; line-height: 1.45; }
+  .hitem.open .hr { display: block; } .hitem.open .hq { white-space: normal; }
 
-  /* Answer button */
-  .answer {
-    position: absolute; z-index: 5; left: 0; right: 0; margin: 0 auto; bottom: var(--safe-b);
-    width: min(calc(100% - 48px), 380px); height: 76px; border-radius: 38px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 12px;
-    font-size: 24px; font-weight: 650; letter-spacing: -0.015em; text-shadow: 0 1px 8px rgba(0,0,0,0.3);
-    background: linear-gradient(165deg, rgba(255,255,255,0.38), rgba(255,255,255,0.06) 60%), rgba(10, 132, 255, 0.62);
-    border-color: rgba(255,255,255,0.4);
-    transition: transform 0.12s ease;
-  }
-  .answer:active { transform: scale(0.97); }
-  .answer svg { width: 26px; height: 26px; }
-  .answer.busy svg { animation: spin 0.9s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  /* Bottom-right buttons */
+  .fabs { position: fixed; right: calc(var(--sr) + 18px); bottom: calc(var(--sb) + 20px); z-index: 6; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+  .mini { width: 50px; height: 50px; margin-right: 13px; border-radius: 50%; display: grid; place-items: center; padding: 0; cursor: pointer;
+    background: rgba(40,44,54,0.92); border: 1px solid var(--line); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+  .mini svg { width: 22px; height: 22px; }
+  .fab { width: 76px; height: 76px; border-radius: 50%; cursor: pointer; display: grid; place-items: center; padding: 0;
+    background: radial-gradient(circle at 35% 30%, #4aa6ff, #0a84ff 60%, #0066d6); border: 2px solid rgba(255,255,255,0.35);
+    box-shadow: 0 10px 28px rgba(10,132,255,0.45), 0 4px 10px rgba(0,0,0,0.4); transition: transform .12s ease; }
+  .fab:active, .mini:active { transform: scale(0.94); }
+  .fab svg { width: 34px; height: 34px; }
+  .fab.busy svg { animation: spin .9s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }
 
-  .flash { position: absolute; inset: 0; z-index: 4; background: #fff; opacity: 0; pointer-events: none; }
-  .flash.go { animation: flash 0.22s ease-out; }
-  @keyframes flash { 0% { opacity: 0.55; } 100% { opacity: 0; } }
+  /* Left-edge readiness bar: full = AI working (or free-tier wait), empty + green dot = ready for the next question */
+  .rbar { position: fixed; z-index: 6; left: calc(var(--sl) + 8px); top: calc(var(--st) + 78px); bottom: calc(var(--sb) + 40px); width: 8px;
+    border-radius: 4px; background: rgba(255,255,255,0.08); }
+  .rfill { position: absolute; left: 0; right: 0; bottom: 0; height: 0%; border-radius: 4px; background: linear-gradient(to top, #0a84ff, #64b5ff);
+    box-shadow: 0 0 12px rgba(10,132,255,0.5); }
+  .rbar.cool .rfill { background: linear-gradient(to top, #ff9f0a, #ffd60a); box-shadow: 0 0 12px rgba(255,159,10,0.5); }
+  .rdot { position: absolute; left: 50%; bottom: -20px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 10px var(--ok); transition: background .2s, box-shadow .2s; }
+  .rbar.busy .rdot, .rbar.cool .rdot { background: rgba(255,255,255,0.22); box-shadow: none; }
+  .toast { position: fixed; z-index: 8; left: 50%; bottom: calc(var(--sb) + 110px); transform: translateX(-50%); max-width: calc(100% - 140px);
+    padding: 10px 16px; border-radius: 18px; font-size: 14px; font-weight: 600; text-align: center; background: rgba(40,44,54,0.96); border: 1px solid var(--line);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .toast.show { opacity: 1; }
 
-  /* Gate (camera problems) */
-  .gate { position: absolute; inset: 0; z-index: 8; display: grid; place-items: center; padding: 24px; background: rgba(0,0,0,0.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
-  .gate[hidden] { display: none; }
-  .card { width: min(100%, 360px); border-radius: 30px; padding: 26px 22px 22px; text-align: center; }
-  .card h2 { margin: 0 0 8px; font-size: 22px; letter-spacing: -0.02em; }
-  .card p { margin: 0 0 18px; font-size: 16px; line-height: 1.45; color: var(--text-dim); }
-
-  .btn { appearance: none; border: 0; cursor: pointer; height: 50px; padding: 0 22px; border-radius: 25px; font-size: 17px; font-weight: 600; background: var(--accent); color: #fff; width: 100%; }
-  .btn.ghost { background: rgba(255,255,255,0.14); margin-top: 10px; }
-  .btn:active { filter: brightness(0.9); }
-
-  /* Settings sheet */
-  .scrim { position: absolute; inset: 0; z-index: 9; background: rgba(0,0,0,0.45); opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s; }
-  .sheet {
-    position: absolute; z-index: 10; left: 0; right: 0; bottom: 0; max-height: 90%; overflow: auto;
-    border-radius: 30px 30px 0 0; padding: 10px 20px calc(var(--safe-b) + 6px);
-    background: linear-gradient(170deg, rgba(255,255,255,0.16), rgba(255,255,255,0.03) 50%), rgba(28, 30, 36, 0.78);
-    -webkit-backdrop-filter: blur(34px) saturate(180%); backdrop-filter: blur(34px) saturate(180%);
-    border: 1px solid var(--hairline); border-bottom: 0;
-    transform: translateY(105%); visibility: hidden; transition: transform 0.38s cubic-bezier(0.2, 0.85, 0.25, 1), visibility 0.38s;
-    -webkit-user-select: text; user-select: text;
-  }
+  /* Sheets (settings / paste) */
+  .scrim { position: fixed; inset: 0; z-index: 9; background: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s; }
+  .sheet { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; max-height: 88%; overflow: auto; max-width: 640px; margin: 0 auto;
+    border-radius: 26px 26px 0 0; padding: 10px calc(var(--sr) + 20px) calc(var(--sb) + 18px) calc(var(--sl) + 20px);
+    background: #161b24; border: 1px solid var(--line); border-bottom: 0; transform: translateY(105%); visibility: hidden;
+    transition: transform .34s cubic-bezier(.2,.85,.25,1), visibility .34s; }
   body.sheet-open .scrim { opacity: 1; visibility: visible; }
-  body.sheet-open .sheet { transform: none; visibility: visible; }
-  .grab { width: 40px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.4); margin: 0 auto 14px; }
-  .sheet h2 { margin: 0 0 14px; font-size: 24px; letter-spacing: -0.02em; }
-  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-  .field label { font-size: 13px; font-weight: 600; color: var(--text-dim); letter-spacing: 0.02em; text-transform: uppercase; }
-  .field input[type="text"], .field input[type="password"] {
-    height: 50px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1);
-    color: #fff; padding: 0 14px; font-size: 16px; font-family: var(--font); outline: none; width: 100%;
-  }
-  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(10,132,255,0.35); }
-  .field small { font-size: 13px; line-height: 1.4; color: var(--text-dim); }
-  .field a { color: #7cc0ff; }
-  .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18); }
-  .seg button { appearance: none; border: 0; background: transparent; height: 40px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; color: var(--text-dim); }
+  .sheet.open { transform: none; visibility: visible; }
+  .grab { width: 40px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.3); margin: 0 auto 14px; }
+  .sheet h2 { margin: 0 0 14px; font-size: 22px; letter-spacing: -0.02em; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .field label { font-size: 12px; font-weight: 700; color: var(--dim); letter-spacing: 0.05em; text-transform: uppercase; }
+  .field input, .field textarea { border-radius: 14px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); color: #fff;
+    padding: 13px 14px; font-size: 16px; font-family: var(--font); outline: none; width: 100%; }
+  .field textarea { min-height: 200px; resize: vertical; line-height: 1.4; }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(10,132,255,0.3); }
+  .field small { font-size: 13px; line-height: 1.45; color: var(--dim); } .field a { color: #7cc0ff; }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); }
+  .seg button { appearance: none; border: 0; background: transparent; height: 40px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; color: var(--dim); }
   .seg button[aria-pressed="true"] { background: rgba(255,255,255,0.92); color: #0b1218; }
-  .status { min-height: 20px; margin: -4px 0 12px; font-size: 14px; font-weight: 600; }
-  .status.ok { color: var(--ok); }
-  .status.bad { color: #ffb4ae; }
-
-  button:focus-visible, a:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-  @media (prefers-reduced-motion: reduce) {
-    .panel, .sheet, .scrim, .answer { transition: none; }
-    .loader span, .answer.busy svg { animation: none; }
-    .flash.go { animation: none; }
-  }
-  @media (max-height: 560px) { .letter { font-size: 72px; } .frame { inset: 10% 6% 40% 6%; } }
+  .status { min-height: 20px; margin: -2px 0 12px; font-size: 14px; font-weight: 600; } .status.ok { color: var(--ok); } .status.bad { color: var(--bad); }
+  .btn { appearance: none; border: 0; cursor: pointer; height: 50px; padding: 0 22px; border-radius: 25px; font-size: 17px; font-weight: 600; background: var(--accent); color: #fff; width: 100%; }
+  .btn.ghost { background: rgba(255,255,255,0.12); margin-top: 10px; }
+  .btn.danger { background: transparent; color: var(--bad); margin-top: 6px; font-size: 15px; height: 44px; }
+  button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { .sheet, .scrim, .fab, .toast { transition: none; } .dots span, .fab.busy svg { animation: none; } }
+  @media (min-width: 700px) { main { padding-top: 12px; } }
 </style>
 </head>
 <body>
-  <video id="cam" autoplay muted playsinline></video>
-  <div class="shade"></div>
-  <div class="frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-  <div id="flash" class="flash"></div>
-
-  <header class="top">
-    <div class="pill glass"><span id="dot" class="dot"></span><span id="status">Starting camera</span></div>
-    <button id="gear" class="round glass" type="button" aria-label="Settings">
+  <header>
+    <div class="brand"><img src="icons/icon-192.png" alt=""><span>PMP Snap</span><small>study</small></div>
+    <button id="gear" class="iconbtn" type="button" aria-label="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
     </button>
   </header>
 
-  <section id="panel" class="panel glass" aria-live="assertive" title="Tap to dismiss">
-    <div id="loader" class="loader" hidden><span></span><span></span><span></span></div>
-    <div id="letter" class="letter" hidden></div>
-    <div id="msg" class="msg" hidden></div>
-    <div id="meta" class="meta" hidden></div>
-  </section>
+  <main>
+    <section id="current" class="card empty" aria-live="polite">
+      <h2>Snap a practice question</h2>
+      <p>Take a photo of a PMP practice question, or pick a screenshot. You'll get the answer and a one-line reason, and the question is saved to your review list.</p>
+      <p class="hint">Bottom right: the blue button opens the camera; the two above it pick a screenshot or let you paste the text.</p>
+    </section>
 
-  <button id="answer" class="answer glass" type="button">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.4" fill="currentColor" stroke="none"/></svg>
-    <span id="answerLabel">Answer</span>
-  </button>
+    <div class="section"><h3>Review list</h3><span id="histCount"></span></div>
+    <div id="hist" class="hist"></div>
+  </main>
 
-  <div id="gate" class="gate" hidden>
-    <div class="card glass">
-      <h2 id="gateTitle"></h2>
-      <p id="gateText"></p>
-      <button id="gateBtn" class="btn" type="button">Turn on camera</button>
-    </div>
+  <div id="readyBar" class="rbar" role="progressbar" aria-label="AI status" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Ready"><div class="rfill"></div><span class="rdot"></span></div>
+  <div id="toast" class="toast" role="status"></div>
+
+  <div class="fabs">
+    <button id="pasteBtn" class="mini" type="button" aria-label="Paste question text">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+    </button>
+    <button id="pickBtn" class="mini" type="button" aria-label="Choose a screenshot or photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>
+    </button>
+    <button id="snapBtn" class="fab" type="button" aria-label="Snap a question with the camera">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg>
+    </button>
   </div>
+  <input id="camInput" type="file" accept="image/*" capture="environment" class="hidden">
+  <input id="fileInput" type="file" accept="image/*" class="hidden">
 
   <div id="scrim" class="scrim"></div>
-  <aside id="sheet" class="sheet" aria-label="Settings" aria-hidden="true">
+
+  <aside id="settings" class="sheet" aria-label="Settings" aria-hidden="true">
     <div class="grab"></div>
     <h2>Settings</h2>
     <div class="field">
       <label for="key">Gemini API key</label>
       <input id="key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste your key">
-      <small>Free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. It stays on this phone and goes only to Google.</small>
+      <small>Free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. It's saved only on this phone and sent only to Google.</small>
     </div>
     <div class="field">
       <label for="model">Model</label>
       <input id="model" type="text" list="models" autocomplete="off" autocapitalize="off" spellcheck="false">
       <datalist id="models"></datalist>
-    </div>
-    <div class="field">
-      <label for="exam">Exam</label>
-      <input id="exam" type="text" autocomplete="off" spellcheck="false" placeholder="PMP">
+      <small>Leave it as is. "Save and test" picks the newest fast Gemini model your key can use.</small>
     </div>
     <div class="field">
       <label id="speedLabel">Speed</label>
       <div class="seg" role="group" aria-labelledby="speedLabel">
-        <button type="button" data-level="low" aria-pressed="false">Fast</button>
-        <button type="button" data-level="medium" aria-pressed="true">Balanced</button>
+        <button type="button" data-level="low" aria-pressed="true">Fast</button>
+        <button type="button" data-level="medium" aria-pressed="false">Balanced</button>
         <button type="button" data-level="high" aria-pressed="false">Best</button>
       </div>
     </div>
     <div id="saveStatus" class="status" role="status"></div>
     <button id="save" class="btn" type="button">Save and test</button>
-    <button id="close" class="btn ghost" type="button">Done</button>
+    <button class="btn ghost" data-close type="button">Done</button>
+    <button id="clearHist" class="btn danger" type="button">Clear review list</button>
+  </aside>
+
+  <aside id="paste" class="sheet" aria-label="Paste a question" aria-hidden="true">
+    <div class="grab"></div>
+    <h2>Paste a question</h2>
+    <div class="field">
+      <label for="qtext">Question and options</label>
+      <textarea id="qtext" placeholder="Paste the question and its A–D options here"></textarea>
+    </div>
+    <button id="askText" class="btn" type="button">Get answer</button>
+    <button class="btn ghost" data-close type="button">Cancel</button>
   </aside>
 
 <script>
@@ -227,267 +222,260 @@
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
 
-  /* Home-screen icon, drawn at load */
-  try {
-    var ic = document.createElement('canvas'); ic.width = ic.height = 180;
-    var g = ic.getContext('2d'), gr = g.createLinearGradient(0, 0, 180, 180);
-    gr.addColorStop(0, '#0c1420'); gr.addColorStop(1, '#0a84ff');
-    g.fillStyle = gr; g.fillRect(0, 0, 180, 180);
-    g.strokeStyle = '#fff'; g.lineWidth = 9; g.beginPath(); g.arc(90, 90, 52, 0, 7); g.stroke();
-    g.fillStyle = '#fff'; g.beginPath(); g.arc(90, 90, 22, 0, 7); g.fill();
-    var iconUrl = ic.toDataURL('image/png');
-    ['apple-touch-icon', 'icon'].forEach(function (rel) { var l = document.createElement('link'); l.rel = rel; l.href = iconUrl; document.head.appendChild(l); });
-  } catch (e) {}
-
-  var cam = $('cam'), dot = $('dot'), statusEl = $('status');
-  var panel = $('panel'), loader = $('loader'), letterEl = $('letter'), msgEl = $('msg'), metaEl = $('meta');
-  var answerBtn = $('answer'), answerLabel = $('answerLabel');
-  var gate = $('gate'), gateTitle = $('gateTitle'), gateText = $('gateText'), gateBtn = $('gateBtn');
-  var sheet = $('sheet'), keyEl = $('key'), modelEl = $('model'), examEl = $('exam'), saveStatus = $('saveStatus');
-
-  var STORE = 'pmpsnap.v1';
-  var API = 'https://generativelanguage.googleapis.com/v1beta/';
-  var cfg = { key: '', model: 'gemini-3.8-flash', exam: 'PMP', level: 'medium' };
+  var STORE = 'pmpsnap.v2', HIST = 'pmpsnap.history';
+  // The API address can be changed only for local testing (see tests/README); normal use always talks to Google.
+  var API = localStorage.getItem('pmpsnap.api') || 'https://generativelanguage.googleapis.com/v1beta/';
+  var cfg = { key: '', model: 'gemini-flash-latest', level: 'low' };
+  try { var old = JSON.parse(localStorage.getItem('pmpsnap.v1') || '{}'); if (old.key) cfg.key = old.key; } catch (e) {}   // keep a key saved by the first version
   try { Object.assign(cfg, JSON.parse(localStorage.getItem(STORE) || '{}')); } catch (e) {}
   function persist() { try { localStorage.setItem(STORE, JSON.stringify(cfg)); } catch (e) {} }
+  var history = []; try { history = JSON.parse(localStorage.getItem(HIST) || '[]'); } catch (e) {}
+  function saveHistory() { try { localStorage.setItem(HIST, JSON.stringify(history.slice(0, 150))); } catch (e) { history = history.slice(0, 60); try { localStorage.setItem(HIST, JSON.stringify(history)); } catch (e2) {} } }
 
-  /* ---------- Camera: starts on load, stays on, restarts after the app was in the background ---------- */
-  var stream = null, wake = null;
+  /* ---------- the study prompt ---------- */
+  var SYSTEM = [
+    'You are a PMP exam coach helping someone study with practice questions.',
+    'The input is one PMP practice question (photo, screenshot or text) with lettered options.',
+    'Answer by PMI standards (PMBOK Guide 7th edition, Agile Practice Guide, current Exam Content Outline): favor the proactive, collaborative,',
+    'servant-leadership, stakeholder-engaging, process-compliant response; for situational questions choose the best NEXT step, not merely a true statement.',
+    'Reply with JSON only, exactly this shape:',
+    '{"found": true, "question": "<the question in at most 18 words>", "answer": "B", "reason": "<one sentence, at most 25 words, why this is right in PMI terms>",',
+    ' "others": [{"option": "A", "why": "<at most 14 words, why it is not the best answer>"}], "domain": "People | Process | Business Environment", "approach": "Predictive | Agile | Hybrid"}',
+    'If more than one option must be chosen, put them in "answer" separated by commas, e.g. "A, C". Include every other option in "others".',
+    'If there is no readable question, reply {"found": false}.'
+  ].join(' ');
 
-  function setStatus(text, kind) {
-    statusEl.textContent = text;
-    dot.className = 'dot' + (kind ? ' ' + kind : '');
-  }
-  function showGate(title, text, withButton) {
-    gateTitle.textContent = title; gateText.textContent = text;
-    gateBtn.hidden = !withButton; gate.hidden = false;
-    setStatus('Camera off', 'bad');
-  }
-  function liveTrack() {
-    var t = stream && stream.getVideoTracks()[0];
-    return t && t.readyState === 'live' ? t : null;
-  }
-  async function startCamera() {
-    if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showGate('Open this over https', 'Browsers only allow the camera on secure pages. Host this file on an https link, open that link, then add it to your home screen.', false);
-      return;
-    }
-    setStatus('Starting camera', '');
-    try {
-      if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); }
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
-        audio: false
-      });
-      cam.srcObject = stream;
-      try { await cam.play(); } catch (e) {}
-      var track = stream.getVideoTracks()[0];
-      track.addEventListener('ended', function () { setStatus('Camera off', 'bad'); });
-      gate.hidden = true;
-      setStatus('Camera on', 'ok');
-      requestWake();
-    } catch (e) {
-      if (e && (e.name === 'NotFoundError' || e.name === 'OverconstrainedError')) {
-        showGate('No camera found', 'This device has no usable camera.', true);
-      } else {
-        showGate('Camera is blocked', 'Allow camera access for this page in your browser settings, then tap the button.', true);
-      }
-    }
-  }
-  async function requestWake() {
-    try { if (navigator.wakeLock && !wake) { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', function () { wake = null; }); } } catch (e) {}
-  }
-  document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'visible') {
-      if (!liveTrack()) { startCamera(); } else { requestWake(); }
-    }
-  });
-  gateBtn.addEventListener('click', startCamera);
+  /* ---------- helpers ---------- */
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function when(t) { var d = new Date(t); return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); }
 
-  /* ---------- Capture and ask Gemini ---------- */
-  var ctl = null;
-  var flashEl = $('flash');
-
-  function capture() {
-    var w = cam.videoWidth, h = cam.videoHeight;
-    var s = Math.min(1, 1600 / Math.max(w, h));
-    var c = document.createElement('canvas');
-    c.width = Math.round(w * s); c.height = Math.round(h * s);
-    c.getContext('2d').drawImage(cam, 0, 0, c.width, c.height);
-    return c.toDataURL('image/jpeg', 0.85).split(',')[1];
-  }
-
-  function systemText() {
-    var pmp = /pmp|pmi|capm|pmbok/i.test(cfg.exam || '');
-    return 'You answer multiple-choice exam questions shown in a photo of a screen. ' +
-      'Pick the one question that is most complete and most central in the photo. ' +
-      'Reply with ONLY the letter of the correct option, for example: B. ' +
-      'If the question needs more than one answer, reply with the letters separated by commas, for example: A, C. ' +
-      'Never explain and never add other words. If you truly cannot read a question, reply with ?.' +
-      (pmp
-        ? ' These are PMP exam questions. Answer by PMI standards (PMBOK Guide 7th edition, Agile Practice Guide, current exam content outline): favor the proactive, collaborative, stakeholder-engaging, process-compliant response, and for situational questions choose the best next step, not merely a true statement.'
-        : ' The exam is: ' + (cfg.exam || 'general') + '.');
-  }
-
-  function parseLetters(text) {
-    var t = String(text || '').toUpperCase().trim();
-    if (!t) return '?';
-    var re = /(?:^|[^A-Z])([A-H])(?![A-Z])/g, out = [], m;
-    while ((m = re.exec(t)) !== null) { if (out.indexOf(m[1]) < 0) out.push(m[1]); if (t.length > 40) break; }
-    return out.length ? out.join(', ') : '?';
-  }
-
-  async function ask(b64, signal, level) {
-    var body = {
-      systemInstruction: { parts: [{ text: systemText() }] },
-      contents: [{ role: 'user', parts: [{ text: 'Answer this question.' }, { inlineData: { mimeType: 'image/jpeg', data: b64 } }] }],
-      generationConfig: {}
-    };
-    if (level) body.generationConfig.thinkingConfig = { thinkingLevel: level };
-    var r = await fetch(API + 'models/' + encodeURIComponent(cfg.model) + ':generateContent', {
-      method: 'POST', signal: signal,
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': cfg.key },
-      body: JSON.stringify(body)
+  function loadImage(file) {
+    return new Promise(function (res, rej) {
+      if (window.createImageBitmap) { createImageBitmap(file, { imageOrientation: 'from-image' }).then(res, function () { viaImg(); }); } else viaImg();
+      function viaImg() { var u = URL.createObjectURL(file), im = new Image(); im.onload = function () { res(im); }; im.onerror = rej; im.src = u; }
     });
-    var j = {};
-    try { j = await r.json(); } catch (e) {}
-    if (!r.ok) {
-      var err = new Error((j.error && j.error.message) || ('HTTP ' + r.status));
-      err.status = r.status; throw err;
-    }
-    if (j.promptFeedback && j.promptFeedback.blockReason) {
-      var be = new Error('Blocked: ' + j.promptFeedback.blockReason); be.status = 0; throw be;
-    }
-    var cand = (j.candidates || [])[0] || {};
-    var parts = (cand.content && cand.content.parts) || [];
-    return parts.filter(function (p) { return p.text && !p.thought; }).map(function (p) { return p.text; }).join('').trim();
+  }
+  function draw(img, max, q) {
+    var w = img.width || img.naturalWidth, h = img.height || img.naturalHeight, s = Math.min(1, max / Math.max(w, h));
+    var c = document.createElement('canvas'); c.width = Math.round(w * s); c.height = Math.round(h * s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', q);
   }
 
+  /* ---------- Gemini ---------- */
+  async function callGemini(parts, signal, level) {
+    var gen = { responseMimeType: 'application/json' };
+    if (level) gen.thinkingConfig = { thinkingLevel: level };
+    var r = await fetch(API + 'models/' + encodeURIComponent(cfg.model) + ':generateContent', {
+      method: 'POST', signal: signal, headers: { 'Content-Type': 'application/json', 'x-goog-api-key': cfg.key },
+      body: JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM }] }, contents: [{ role: 'user', parts: parts }], generationConfig: gen })
+    });
+    var j = {}; try { j = await r.json(); } catch (e) {}
+    if (!r.ok) {
+      var err = new Error((j.error && j.error.message) || ('HTTP ' + r.status)); err.status = r.status;
+      // Google says how long to wait on a rate limit (RetryInfo.retryDelay, e.g. "23s"); the left bar counts it down.
+      var ri = ((j.error && j.error.details) || []).filter(function (d) { return d.retryDelay; })[0];
+      if (ri) err.retry = parseFloat(ri.retryDelay) || 0;
+      throw err;
+    }
+    if (j.promptFeedback && j.promptFeedback.blockReason) { var be = new Error('Blocked: ' + j.promptFeedback.blockReason); be.status = 0; throw be; }
+    var cand = (j.candidates || [])[0] || {};
+    return ((cand.content && cand.content.parts) || []).filter(function (p) { return p.text && !p.thought; }).map(function (p) { return p.text; }).join('').trim();
+  }
+  async function ask(parts, signal) {
+    try { return await callGemini(parts, signal, cfg.level); }
+    catch (e) { if (e.status === 400 && /thinking/i.test(e.message || '')) return callGemini(parts, signal, null); throw e; }   // older models don't take thinkingLevel
+  }
+  function parseResult(text) {
+    var t = String(text || '').replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    try { var o = JSON.parse(t); if (o && typeof o === 'object') return o; } catch (e) {}
+    var m = t.match(/\{[\s\S]*\}/); if (m) { try { return JSON.parse(m[0]); } catch (e) {} }
+    return { found: true, answer: '?', reason: t.slice(0, 200) };
+  }
   function humanError(e) {
     var s = e && e.status, m = (e && e.message) || '';
     if (s === 400 && /api key/i.test(m)) return 'API key not valid. Check it in Settings.';
     if (s === 401 || s === 403) return 'Google rejected the key. Check it in Settings.';
-    if (s === 404) return 'Model not found. Pick another in Settings.';
-    if (s === 429) return 'Rate limit reached. Wait a few seconds, then tap Answer.';
-    if (s >= 500) return 'Gemini is busy. Tap Answer again.';
-    if (e instanceof TypeError) return 'No connection. Check your signal and tap Answer again.';
-    return m.slice(0, 120) || 'Something went wrong. Tap Answer again.';
+    if (s === 404) return 'Model not found. Open Settings and tap "Save and test".';
+    if (s === 429) return 'Free-tier limit reached. You can go again when the bar on the left is empty.';
+    if (s >= 500) return 'Gemini is busy. Try again.';
+    if (e instanceof TypeError) return 'No connection. Check your signal and try again.';
+    return m.slice(0, 140) || 'Something went wrong. Try again.';
   }
 
-  function showPanel(kind, a, b) {
-    loader.hidden = kind !== 'busy';
-    letterEl.hidden = kind !== 'result';
-    msgEl.hidden = kind !== 'error';
-    metaEl.hidden = kind !== 'result';
-    if (kind === 'result') {
-      letterEl.textContent = a;
-      letterEl.className = 'letter' + (a.length > 2 ? ' multi' : '');
-      metaEl.textContent = b;
-    } else if (kind === 'error') {
-      msgEl.textContent = a; msgEl.className = 'msg bad';
-    }
-    panel.classList.add('show');
+  /* ---------- render ---------- */
+  var current = $('current'), snapBtn = $('snapBtn');
+  function renderLoading(thumb) {
+    current.className = 'card result';
+    current.innerHTML = '<div class="top">' + (thumb ? '<img class="thumb" alt="" src="' + thumb + '">' : '') +
+      '<div class="loading"><div class="dots"><span></span><span></span><span></span></div><span class="q">Reading the question…</span></div></div>';
   }
-  function hidePanel() { panel.classList.remove('show'); }
-  function setBusy(on) {
-    answerBtn.classList.toggle('busy', on);
-    answerLabel.textContent = on ? 'Reading' : 'Answer';
+  function renderError(msg, thumb) {
+    current.className = 'card result';
+    current.innerHTML = '<div class="top">' + (thumb ? '<img class="thumb" alt="" src="' + thumb + '">' : '') + '<div class="err">' + esc(msg) + '</div></div>';
   }
-
-  async function onAnswer() {
-    if (!cfg.key) { openSheet('Add your Gemini API key to start.', 'bad'); return; }
-    if (!liveTrack() || !cam.videoWidth) { showPanel('error', 'Camera is not ready yet.'); startCamera(); return; }
-    if (ctl) ctl.abort();
-    var mine = ctl = new AbortController();
-    var timedOut = false;
-    var timer = setTimeout(function () { timedOut = true; mine.abort(); }, 30000);
-    flashEl.classList.remove('go'); void flashEl.offsetWidth; flashEl.classList.add('go');
-    var img = capture(), t0 = performance.now();
-    showPanel('busy'); setBusy(true);
-    try {
-      var text;
-      try { text = await ask(img, mine.signal, cfg.level); }
-      catch (e) {
-        if (e.status === 400 && /thinking/i.test(e.message || '')) { text = await ask(img, mine.signal, null); }
-        else { throw e; }
-      }
-      if (mine !== ctl) return;
-      var secs = ((performance.now() - t0) / 1000).toFixed(1);
-      showPanel('result', parseLetters(text), cfg.model + ' · ' + secs + ' s');
-      try { if (navigator.vibrate) navigator.vibrate(30); } catch (e2) {}
-    } catch (e) {
-      if (mine !== ctl) return;
-      if (e && e.name === 'AbortError') { if (timedOut) showPanel('error', 'Took too long. Tap Answer again.'); return; }
-      showPanel('error', humanError(e));
-    } finally {
-      clearTimeout(timer);
-      if (mine === ctl) setBusy(false);
-    }
+  function renderResult(item) {
+    current.className = 'card result';
+    var others = (item.others || []).map(function (o) { return '<div class="other"><b>' + esc(o.option) + '</b><span>' + esc(o.why) + '</span></div>'; }).join('');
+    var chips = [item.domain, item.approach].filter(Boolean).map(function (c) { return '<span class="chip">' + esc(c) + '</span>'; }).join('');
+    current.innerHTML =
+      '<div class="top">' + (item.thumb ? '<img class="thumb" alt="" src="' + item.thumb + '">' : '') +
+      '<div class="q">' + esc(item.question || 'Practice question') + '</div></div>' +
+      '<div class="ans"><div class="letter' + (String(item.answer).length > 2 ? ' multi' : '') + '">' + esc(item.answer) + '</div>' +
+      '<div class="reason">' + esc(item.reason || '') + '</div></div>' +
+      (chips ? '<div class="chips">' + chips + '</div>' : '') +
+      (others ? '<details class="others"><summary>Why not the others</summary>' + others + '</details>' : '') +
+      '<div class="meta">' + esc(item.model) + ' · ' + item.secs + ' s · saved to review list</div>';
   }
-  answerBtn.addEventListener('click', onAnswer);
-  panel.addEventListener('click', hidePanel);
-
-  /* ---------- Settings ---------- */
-  function openSheet(note, kind) {
-    keyEl.value = cfg.key; modelEl.value = cfg.model; examEl.value = cfg.exam;
-    setLevelButtons(cfg.level);
-    saveStatus.textContent = note || ''; saveStatus.className = 'status' + (kind ? ' ' + kind : '');
-    document.body.classList.add('sheet-open'); sheet.setAttribute('aria-hidden', 'false');
-  }
-  function closeSheet() { document.body.classList.remove('sheet-open'); sheet.setAttribute('aria-hidden', 'true'); }
-  function setLevelButtons(level) {
-    Array.prototype.forEach.call(sheet.querySelectorAll('.seg button'), function (b) {
-      b.setAttribute('aria-pressed', b.getAttribute('data-level') === level ? 'true' : 'false');
+  function renderHistory() {
+    var box = $('hist'); box.innerHTML = '';
+    $('histCount').textContent = history.length ? history.length + ' saved' : '';
+    if (!history.length) { box.innerHTML = '<div class="hs" style="color:var(--dim);font-size:14px;padding:4px">Questions you snap show up here so you can review them later.</div>'; return; }
+    history.forEach(function (h, i) {
+      var el = document.createElement('div'); el.className = 'hitem'; el.setAttribute('role', 'button'); el.tabIndex = 0;
+      el.innerHTML = '<div class="row"><div class="hl">' + esc(h.answer) + '</div><div class="ht"><div class="hq">' + esc(h.question || 'Practice question') + '</div>' +
+        '<div class="hs">' + esc([h.domain, when(h.t)].filter(Boolean).join(' · ')) + '</div></div></div>' +
+        '<div class="hr"><b>Why:</b> ' + esc(h.reason || '') + (h.others && h.others.length ? '<br>' + h.others.map(function (o) { return '<b>' + esc(o.option) + '</b> — ' + esc(o.why); }).join('<br>') : '') + '</div>';
+      el.addEventListener('click', function () { el.classList.toggle('open'); });
+      el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.classList.toggle('open'); } });
+      box.appendChild(el);
     });
   }
-  Array.prototype.forEach.call(sheet.querySelectorAll('.seg button'), function (b) {
-    b.addEventListener('click', function () { setLevelButtons(b.getAttribute('data-level')); });
+
+  /* ---------- readiness bar (left edge) ---------- */
+  // Busy: starts full and drains over the usual answer time (learned from recent answers), holding a sliver until the
+  // answer actually arrives. Rate-limited: amber, drains over Google's retry delay. Empty + green dot: ready.
+  var bar = $('readyBar'), fill = bar.querySelector('.rfill'), barRaf = 0, coolUntil = 0, toastTimer = 0;
+  var avgMs = parseFloat(localStorage.getItem('pmpsnap.avgms')) || 4000;
+  function setBar(pct, mode) {
+    fill.style.height = Math.max(0, Math.min(100, pct)) + '%';
+    bar.className = 'rbar' + (mode ? ' ' + mode : '');
+    bar.setAttribute('aria-valuenow', String(Math.round(pct)));
+    bar.setAttribute('aria-valuetext', mode === 'busy' ? 'AI is working' : mode === 'cool' ? 'Waiting for the free-tier limit' : 'Ready');
+  }
+  function animateBar(fn) { cancelAnimationFrame(barRaf); fill.style.transition = 'none'; (function step() { if (fn() !== false) barRaf = requestAnimationFrame(step); })(); }
+  function barBusy() { var t0 = performance.now(); animateBar(function () { setBar(100 - 92 * Math.min(1, (performance.now() - t0) / avgMs), 'busy'); }); }
+  function barReady(tookMs) {
+    if (tookMs) { avgMs = Math.min(20000, avgMs * 0.6 + tookMs * 0.4); try { localStorage.setItem('pmpsnap.avgms', String(Math.round(avgMs))); } catch (e) {} }
+    if (Date.now() < coolUntil) return;          // a rate-limit countdown is running — leave it alone
+    cancelAnimationFrame(barRaf);
+    fill.style.transition = 'height .3s ease-out'; setBar(0, '');
+  }
+  function barCooldown(sec) {
+    var total = Math.max(3, sec) * 1000; coolUntil = Date.now() + total;
+    animateBar(function () { var left = coolUntil - Date.now(); if (left <= 0) { setBar(0, ''); return false; } setBar(100 * left / total, 'cool'); });
+  }
+  function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200); }
+  function coolingDown() {
+    var left = Math.ceil((coolUntil - Date.now()) / 1000);
+    if (left > 0) { toast('Ready in ' + left + ' s — wait for the bar on the left to empty'); return true; }
+    return false;
+  }
+
+  /* ---------- the main flow: image or text → answer + reason ---------- */
+  var ctl = null;
+  async function solve(parts, thumb) {
+    if (!cfg.key) { openSheet('settings', 'Add your Gemini API key to start.', 'bad'); return; }
+    if (coolingDown()) return;
+    if (ctl) ctl.abort();
+    var mine = ctl = new AbortController(), timedOut = false;
+    var timer = setTimeout(function () { timedOut = true; mine.abort(); }, 30000);
+    renderLoading(thumb); snapBtn.classList.add('busy'); barBusy();
+    var t0 = performance.now(), okMs = 0;
+    try {
+      var o = parseResult(await ask(parts, mine.signal));
+      if (mine !== ctl) return;
+      if (o.found === false) { renderError("Couldn't find a question in that. Try again with the whole question and its options in view.", thumb); return; }
+      var item = { t: Date.now(), question: o.question, answer: String(o.answer || '?').toUpperCase(), reason: o.reason, others: Array.isArray(o.others) ? o.others : [],
+        domain: o.domain, approach: o.approach, thumb: thumb, model: cfg.model, secs: ((performance.now() - t0) / 1000).toFixed(1) };
+      okMs = performance.now() - t0;
+      renderResult(item);
+      history.unshift({ t: item.t, question: item.question, answer: item.answer, reason: item.reason, others: item.others, domain: item.domain, approach: item.approach });
+      saveHistory(); renderHistory();
+      try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {}
+    } catch (e) {
+      if (mine !== ctl) return;
+      if (e && e.name === 'AbortError') { if (timedOut) renderError('Took too long. Try again.', thumb); return; }
+      if (e && e.status === 429) barCooldown(e.retry || 30);
+      renderError(humanError(e), thumb);
+    } finally { clearTimeout(timer); if (mine === ctl) { snapBtn.classList.remove('busy'); barReady(okMs); } }
+  }
+  async function solveFile(file) {
+    if (!file) return;
+    try {
+      var img = await loadImage(file);
+      var full = draw(img, 1600, 0.85), thumb = draw(img, 160, 0.7);
+      await solve([{ text: 'Here is the practice question.' }, { inlineData: { mimeType: 'image/jpeg', data: full.split(',')[1] } }], thumb);
+    } catch (e) { renderError("Couldn't open that image. Try another photo."); }
+  }
+  window.pmpSolveFile = solveFile;   // used by the local test (tests/mock-gemini.js)
+
+  $('snapBtn').addEventListener('click', function () { if (coolingDown()) return; $('camInput').value = ''; $('camInput').click(); });
+  $('pickBtn').addEventListener('click', function () { if (coolingDown()) return; $('fileInput').value = ''; $('fileInput').click(); });
+  $('camInput').addEventListener('change', function (e) { solveFile(e.target.files[0]); });
+  $('fileInput').addEventListener('change', function (e) { solveFile(e.target.files[0]); });
+  $('pasteBtn').addEventListener('click', function () { openSheet('paste'); setTimeout(function () { $('qtext').focus(); }, 350); });
+  $('askText').addEventListener('click', function () {
+    var t = $('qtext').value.trim(); if (!t) return;
+    closeSheets(); solve([{ text: 'Practice question:\n' + t }], null);
   });
-  $('gear').addEventListener('click', function () { openSheet(''); });
-  $('scrim').addEventListener('click', closeSheet);
-  $('close').addEventListener('click', closeSheet);
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+
+  /* ---------- sheets ---------- */
+  function openSheet(id, note, kind) {
+    closeSheets();
+    if (id === 'settings') {
+      $('key').value = cfg.key; $('model').value = cfg.model; setLevel(cfg.level);
+      $('saveStatus').textContent = note || ''; $('saveStatus').className = 'status' + (kind ? ' ' + kind : '');
+    }
+    $(id).classList.add('open'); $(id).setAttribute('aria-hidden', 'false'); document.body.classList.add('sheet-open');
+  }
+  function closeSheets() {
+    ['settings', 'paste'].forEach(function (id) { $(id).classList.remove('open'); $(id).setAttribute('aria-hidden', 'true'); });
+    document.body.classList.remove('sheet-open');
+  }
+  function setLevel(level) { document.querySelectorAll('.seg button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.level === level ? 'true' : 'false'); }); }
+  document.querySelectorAll('.seg button').forEach(function (b) { b.addEventListener('click', function () { setLevel(b.dataset.level); }); });
+  document.querySelectorAll('[data-close]').forEach(function (b) { b.addEventListener('click', closeSheets); });
+  $('scrim').addEventListener('click', closeSheets);
+  $('gear').addEventListener('click', function () { openSheet('settings'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheets(); });
+  $('clearHist').addEventListener('click', function () {
+    if ($('clearHist').dataset.confirm !== '1') { $('clearHist').dataset.confirm = '1'; $('clearHist').textContent = 'Tap again to clear ' + history.length + ' questions'; return; }
+    history = []; saveHistory(); renderHistory(); $('clearHist').dataset.confirm = ''; $('clearHist').textContent = 'Clear review list';
+  });
 
   async function listModels(key) {
     var r = await fetch(API + 'models?pageSize=200', { headers: { 'x-goog-api-key': key } });
-    var j = {};
-    try { j = await r.json(); } catch (e) {}
+    var j = {}; try { j = await r.json(); } catch (e) {}
     if (!r.ok) { var err = new Error((j.error && j.error.message) || ('HTTP ' + r.status)); err.status = r.status; throw err; }
-    return (j.models || [])
-      .filter(function (m) { return (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0; })
+    return (j.models || []).filter(function (m) { return (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0; })
       .map(function (m) { return m.name.replace(/^models\//, ''); })
       .filter(function (n) { return /^gemini/.test(n) && !/(image|tts|live|audio|embedding|robotics|computer|native)/.test(n); });
   }
   function versionOf(n) { var m = n.match(/^gemini-(\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 0; }
-
   $('save').addEventListener('click', async function () {
-    var level = 'medium';
-    Array.prototype.forEach.call(sheet.querySelectorAll('.seg button'), function (b) { if (b.getAttribute('aria-pressed') === 'true') level = b.getAttribute('data-level'); });
-    cfg.key = keyEl.value.trim(); cfg.model = modelEl.value.trim() || 'gemini-3.8-flash';
-    cfg.exam = examEl.value.trim() || 'PMP'; cfg.level = level;
-    persist();
-    if (!cfg.key) { saveStatus.textContent = 'Saved. Add a key to get answers.'; saveStatus.className = 'status bad'; return; }
-    saveStatus.textContent = 'Checking key...'; saveStatus.className = 'status';
+    var level = 'low'; document.querySelectorAll('.seg button').forEach(function (b) { if (b.getAttribute('aria-pressed') === 'true') level = b.dataset.level; });
+    cfg.key = $('key').value.trim(); cfg.model = $('model').value.trim() || 'gemini-flash-latest'; cfg.level = level; persist();
+    var st = $('saveStatus');
+    if (!cfg.key) { st.textContent = 'Saved. Add a key to get answers.'; st.className = 'status bad'; return; }
+    st.textContent = 'Checking key…'; st.className = 'status';
     try {
       var names = await listModels(cfg.key);
       var dl = $('models'); dl.textContent = '';
       names.forEach(function (n) { var o = document.createElement('option'); o.value = n; dl.appendChild(o); });
       var note = 'Key works.';
       if (names.length && names.indexOf(cfg.model) < 0) {
-        var flash = names.filter(function (n) { return /^gemini-\d+(\.\d+)?-flash$/.test(n); })
-          .sort(function (a, b) { return versionOf(b) - versionOf(a); })[0] || names[0];
-        cfg.model = flash; modelEl.value = flash; persist();
-        note = 'Key works. Model set to ' + flash + '.';
+        var flash = names.filter(function (n) { return /^gemini-\d+(\.\d+)?-flash$/.test(n); }).sort(function (a, b) { return versionOf(b) - versionOf(a); })[0] || names[0];
+        cfg.model = flash; $('model').value = flash; persist(); note = 'Key works. Using ' + flash + '.';
       }
-      saveStatus.textContent = note; saveStatus.className = 'status ok';
-    } catch (e) {
-      saveStatus.textContent = humanError(e); saveStatus.className = 'status bad';
-    }
+      st.textContent = note; st.className = 'status ok';
+    } catch (e) { st.textContent = humanError(e); st.className = 'status bad'; }
   });
 
-  /* ---------- Go ---------- */
-  startCamera();
-  if (!cfg.key) { setTimeout(function () { if (gate.hidden) openSheet('Add your Gemini API key to start.', 'bad'); }, 600); }
+  /* ---------- go ---------- */
+  renderHistory();
+  if (!cfg.key) setTimeout(function () { openSheet('settings', 'Add your Gemini API key to start.', 'bad'); }, 500);
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () {});
 })();
 </script>
 </body>
