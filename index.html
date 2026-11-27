@@ -74,13 +74,13 @@
       transform: translateX(-50%);
       z-index: 10;
 
-      /* Leave generous clearance for bottom-right shutter in both portrait & landscape */
+      /* Clearance for bottom-right shutter in both portrait & landscape */
       max-width: calc(100vw - var(--sl) - var(--sr) - 195px);
       min-width: 160px;
 
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
       padding: 10px 18px;
       border-radius: 999px;
 
@@ -106,6 +106,24 @@
       font-weight: 700;
       color: rgba(255, 255, 255, 0.72);
       flex-shrink: 0;
+    }
+
+    .mode-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 3px 6px;
+      border-radius: 6px;
+      background: rgba(48, 209, 88, 0.22);
+      color: #63e685;
+      border: 1px solid rgba(48, 209, 88, 0.35);
+      flex-shrink: 0;
+    }
+
+    .mode-tag.img-mode {
+      background: rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.72);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .ans-badge {
@@ -204,7 +222,7 @@
       max-height: 85vh; overflow-y: auto; max-width: 600px; margin: 0 auto;
       border-radius: 26px 26px 0 0;
       padding: 12px calc(var(--sr) + 20px) calc(var(--sb) + 20px) calc(var(--sl) + 20px);
-      background: rgba(22, 24, 30, 0.9);
+      background: rgba(22, 24, 30, 0.92);
       backdrop-filter: blur(28px) saturate(180%);
       -webkit-backdrop-filter: blur(28px) saturate(180%);
       border: 1px solid rgba(255, 255, 255, 0.16);
@@ -279,6 +297,14 @@
       font-size: 14px; font-weight: 600; cursor: pointer; color: rgba(255,255,255,0.65);
     }
     .seg button[aria-pressed="true"] { background: #fff; color: #000; }
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14); margin-bottom: 14px;
+    }
+    .toggle-row span { font-size: 14px; font-weight: 600; }
+    .toggle-row small { display: block; font-size: 11.5px; color: rgba(255,255,255,0.6); font-weight: 400; }
+    .toggle-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
     .status { min-height: 18px; margin: -2px 0 12px; font-size: 13.5px; font-weight: 600; }
     .status.ok { color: var(--ok); }
     .status.bad { color: var(--bad); }
@@ -313,7 +339,7 @@
     </svg>
   </button>
 
-  <!-- Bottom-center Apple frosted glass one-line answer pill (tapping opens history) -->
+  <!-- Bottom-center Apple frosted glass one-line answer pill -->
   <div id="answerPill" class="glass-answer hidden-pill" role="button" tabindex="0" aria-live="polite"></div>
 
   <!-- Bottom-right camera shutter button (stays bottom-right in landscape) -->
@@ -358,18 +384,27 @@
         <button type="button" data-level="high" aria-pressed="false">Best</button>
       </div>
     </div>
+    <label class="toggle-row" for="useOcr">
+      <div>
+        <span>Smart OCR Token Saver</span>
+        <small>Extracts text on-device first; falls back to image if glare/diagram</small>
+      </div>
+      <input id="useOcr" type="checkbox" checked>
+    </label>
     <div id="saveStatus" class="status" role="status"></div>
     <button id="save" class="btn" type="button">Save and test</button>
     <button class="btn ghost" data-close type="button">Done</button>
   </aside>
 
+  <!-- Tesseract.js v5 for local browser OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script>
     (function () {
       'use strict';
       var $ = function (id) { return document.getElementById(id); };
       var STORE = 'pmpsnap.v2', HIST = 'pmpsnap.history';
       var API = localStorage.getItem('pmpsnap.api') || 'https://generativelanguage.googleapis.com/v1beta/';
-      var cfg = { key: '', model: 'gemini-flash-latest', level: 'low' };
+      var cfg = { key: '', model: 'gemini-flash-latest', level: 'low', useOcr: true };
 
       try {
         var old = JSON.parse(localStorage.getItem('pmpsnap.v1') || '{}');
@@ -411,6 +446,46 @@
         }
       }
 
+      /* ---------- Local Browser OCR (Tesseract.js) ---------- */
+      var ocrWorker = null;
+      var ocrInitPromise = null;
+
+      function getOcrWorker() {
+        if (!window.Tesseract) return Promise.resolve(null);
+        if (ocrWorker) return Promise.resolve(ocrWorker);
+        if (!ocrInitPromise) {
+          ocrInitPromise = Tesseract.createWorker('eng')
+            .then(function (w) {
+              ocrWorker = w;
+              return w;
+            })
+            .catch(function () {
+              ocrInitPromise = null;
+              return null;
+            });
+        }
+        return ocrInitPromise;
+      }
+
+      async function runLocalOCR(canvasEl) {
+        if (!cfg.useOcr) return null;
+        var worker = await getOcrWorker();
+        if (!worker) return null;
+        try {
+          var ret = await worker.recognize(canvasEl);
+          var rawText = (ret && ret.data && ret.data.text) ? ret.data.text.replace(/\n{3,}/g, '\n\n').trim() : '';
+          var confidence = (ret && ret.data && typeof ret.data.confidence === 'number') ? ret.data.confidence : 0;
+          // Quality gate: require decent OCR confidence, >= 45 chars, and multiple-choice markers (A/B/C/D)
+          var hasOptions = /(?:^|\s)[A-D][\.\)\:]\s+/m.test(rawText);
+          if (confidence >= 52 && rawText.length >= 45 && hasOptions) {
+            return rawText;
+          }
+          return null;
+        } catch (e) {
+          return null;
+        }
+      }
+
       /* ---------- Live Camera Initialization ---------- */
       var video = $('cameraFeed');
       var canvas = $('captureCanvas');
@@ -427,26 +502,28 @@
           video.onloadedmetadata = function () {
             video.play();
             cameraReady = true;
+            // Pre-warm OCR worker quietly after camera starts
+            if (cfg.useOcr) setTimeout(getOcrWorker, 800);
           };
         } catch (err) {
           showPillError('Camera blocked — tap shutter to pick photo');
         }
       }
 
-      function captureFrameBase64() {
+      function drawVideoToCanvas() {
         var w = video.videoWidth;
         var h = video.videoHeight;
-        if (!w || !h) return null;
-        var scale = Math.min(1, 1600 / Math.max(w, h));
+        if (!w || !h) return false;
+        var scale = Math.min(1, 1280 / Math.max(w, h));
         canvas.width = Math.round(w * scale);
         canvas.height = Math.round(h * scale);
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        return canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+        return true;
       }
 
       /* ---------- Prompt (Extracts question number + strict 1-line brief answer) ---------- */
       var SYSTEM = [
-        'You are a PMP exam coach. Analyze the practice question shown in the image.',
+        'You are a PMP exam coach. Analyze the practice question provided.',
         'Answer by PMI standards (PMBOK Guide 7th edition, Agile Practice Guide).',
         'Extract the visible question number as an integer in "qnum" (or null if none is visible).',
         'Reply with JSON only in this exact shape:',
@@ -464,15 +541,18 @@
       var pill = $('answerPill');
       var snapBtn = $('snapBtn');
 
-      function showPillLoading() {
-        pill.innerHTML = '<div class="dots"><span></span><span></span><span></span></div><span class="ans-line">Analyzing…</span>';
+      function showPillLoading(stageText) {
+        pill.innerHTML = '<div class="dots"><span></span><span></span><span></span></div><span class="ans-line">' + esc(stageText || 'Analyzing…') + '</span>';
         pill.classList.remove('hidden-pill');
       }
 
-      function showPillAnswer(qnum, answer, reason) {
+      function showPillAnswer(qnum, answer, reason, usedOcr) {
         var cleanReason = String(reason || '').replace(/\s+/g, ' ').trim();
         var qLabel = (typeof qnum === 'number' && !isNaN(qnum)) ? '<span class="qnum-tag">Q' + esc(qnum) + '</span>' : '';
-        pill.innerHTML = qLabel + '<span class="ans-badge">' + esc(answer) + '</span><span class="ans-line">' + esc(cleanReason) + '</span>';
+        var modeBadge = usedOcr
+          ? '<span class="mode-tag">OCR</span>'
+          : '<span class="mode-tag img-mode">IMG</span>';
+        pill.innerHTML = qLabel + '<span class="ans-badge">' + esc(answer) + '</span><span class="ans-line">' + esc(cleanReason) + '</span>' + modeBadge;
         pill.classList.remove('hidden-pill');
       }
 
@@ -525,23 +605,25 @@
         });
       }
 
-      /* ---------- Gemini API Call ---------- */
-      async function callGemini(base64Data, signal, level) {
+      /* ---------- Gemini API Call (Text-only OCR or Image Fallback) ---------- */
+      async function callGemini(payload, signal, level) {
         var gen = { responseMimeType: 'application/json' };
         if (level) gen.thinkingConfig = { thinkingLevel: level };
+
+        var userParts = payload.ocrText
+          ? [{ text: 'Solve this PMP question in one brief line and extract its question number:\n\n' + payload.ocrText }]
+          : [
+              { text: 'Solve this question in one brief line and extract its question number.' },
+              { inlineData: { mimeType: 'image/jpeg', data: payload.base64Data } }
+            ];
+
         var r = await fetch(API + 'models/' + encodeURIComponent(cfg.model) + ':generateContent', {
           method: 'POST',
           signal: signal,
           headers: { 'Content-Type': 'application/json', 'x-goog-api-key': cfg.key },
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: SYSTEM }] },
-            contents: [{
-              role: 'user',
-              parts: [
-                { text: 'Solve this question in one brief line and extract its question number.' },
-                { inlineData: { mimeType: 'image/jpeg', data: base64Data } }
-              ]
-            }],
+            contents: [{ role: 'user', parts: userParts }],
             generationConfig: gen
           })
         });
@@ -574,25 +656,37 @@
       }
 
       var ctl = null;
-      async function solveBase64(base64Data) {
+      async function solveCanvas() {
         if (!cfg.key) {
           openSheet('settings', 'Add your Gemini API key to start.', 'bad');
           return;
         }
         if (ctl) ctl.abort();
         var mine = ctl = new AbortController();
-        var timer = setTimeout(function () { mine.abort(); }, 25000);
+        var timer = setTimeout(function () { mine.abort(); }, 28000);
 
-        showPillLoading();
         snapBtn.classList.add('busy');
 
         try {
+          var ocrText = null;
+          if (cfg.useOcr) {
+            showPillLoading('Reading text…');
+            ocrText = await runLocalOCR(canvas);
+            if (mine !== ctl) return;
+          }
+
+          var payload = ocrText
+            ? { ocrText: ocrText }
+            : { base64Data: canvas.toDataURL('image/jpeg', 0.82).split(',')[1] };
+
+          showPillLoading(ocrText ? 'Solving text…' : 'Solving image…');
+
           var raw;
           try {
-            raw = await callGemini(base64Data, mine.signal, cfg.level);
+            raw = await callGemini(payload, mine.signal, cfg.level);
           } catch (e) {
             if (e.status === 400 && /thinking/i.test(e.message || '')) {
-              raw = await callGemini(base64Data, mine.signal, null);
+              raw = await callGemini(payload, mine.signal, null);
             } else {
               throw e;
             }
@@ -607,9 +701,8 @@
           var parsedNum = (res.qnum != null && !isNaN(parseInt(res.qnum, 10))) ? parseInt(res.qnum, 10) : null;
           var ansLetter = String(res.answer || '?').toUpperCase();
 
-          showPillAnswer(parsedNum, ansLetter, res.reason);
+          showPillAnswer(parsedNum, ansLetter, res.reason, Boolean(ocrText));
 
-          // Save to history & sort by question number
           var entry = {
             t: Date.now(),
             qnum: parsedNum,
@@ -620,7 +713,6 @@
             domain: res.domain || ''
           };
 
-          // Replace if same question number already exists, otherwise insert
           if (parsedNum !== null) {
             var existingIdx = history.findIndex(function (h) { return extractQuestionNum(h) === parsedNum; });
             if (existingIdx >= 0) history[existingIdx] = entry;
@@ -647,12 +739,9 @@
 
       /* ---------- Shutter Click, Pill Click & Fallback ---------- */
       $('snapBtn').addEventListener('click', function () {
-        if (cameraReady) {
-          var b64 = captureFrameBase64();
-          if (b64) {
-            solveBase64(b64);
-            return;
-          }
+        if (cameraReady && drawVideoToCanvas()) {
+          solveCanvas();
+          return;
         }
         $('fallbackInput').value = '';
         $('fallbackInput').click();
@@ -673,11 +762,11 @@
         reader.onload = function () {
           var im = new Image();
           im.onload = function () {
-            var s = Math.min(1, 1600 / Math.max(im.width, im.height));
+            var s = Math.min(1, 1280 / Math.max(im.width, im.height));
             canvas.width = Math.round(im.width * s);
             canvas.height = Math.round(im.height * s);
             canvas.getContext('2d').drawImage(im, 0, 0, canvas.width, canvas.height);
-            solveBase64(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+            solveCanvas();
           };
           im.src = reader.result;
         };
@@ -690,6 +779,7 @@
         if (id === 'settings') {
           $('key').value = cfg.key;
           $('model').value = cfg.model;
+          $('useOcr').checked = cfg.useOcr !== false;
           setLevel(cfg.level);
           $('saveStatus').textContent = note || '';
           $('saveStatus').className = 'status' + (kind ? ' ' + kind : '');
@@ -743,6 +833,7 @@
         cfg.key = $('key').value.trim();
         cfg.model = $('model').value.trim() || 'gemini-flash-latest';
         cfg.level = level;
+        cfg.useOcr = $('useOcr').checked;
         persist();
 
         var st = $('saveStatus');
