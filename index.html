@@ -18,7 +18,6 @@
       --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
       --round: ui-rounded, "SF Pro Rounded", -apple-system, system-ui, sans-serif;
       --accent: #0a84ff;
-      --ok: #30d158;
       --bad: #ff6b60;
       --st: env(safe-area-inset-top, 0px);
       --sb: env(safe-area-inset-bottom, 0px);
@@ -30,7 +29,6 @@
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: var(--font); color: #fff; }
     .hidden { display: none !important; }
 
-    /* Full-screen live camera feed */
     #cameraFeed {
       position: fixed;
       inset: 0;
@@ -41,10 +39,10 @@
       background: #000;
     }
 
-    /* Top floating controls */
     .top-btn {
       position: fixed;
       top: calc(var(--st) + 16px);
+      left: calc(var(--sl) + 16px);
       z-index: 10;
       height: 40px;
       padding: 0 14px;
@@ -56,39 +54,32 @@
       color: #fff;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 7px;
       font-size: 13.5px;
       font-weight: 600;
       cursor: pointer;
     }
-    .top-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
-    #histBtn { left: calc(var(--sl) + 16px); }
-    #gear { right: calc(var(--sr) + 16px); width: 40px; padding: 0; }
+    .top-btn svg { width: 18px; height: 18px; }
 
-    /* Bottom-center Apple-style frosted glass answer pill */
+    /* Bottom-center Apple frosted glass pill */
     .glass-answer {
       position: fixed;
       bottom: calc(var(--sb) + 26px);
       left: 50%;
       transform: translateX(-50%);
       z-index: 10;
-
       max-width: calc(100vw - var(--sl) - var(--sr) - 195px);
       min-width: 175px;
-
       display: flex;
       align-items: center;
       gap: 9px;
       padding: 10px 18px;
       border-radius: 999px;
-
       background: rgba(28, 28, 30, 0.56);
       backdrop-filter: blur(24px) saturate(190%);
       -webkit-backdrop-filter: blur(24px) saturate(190%);
       border: 1px solid rgba(255, 255, 255, 0.24);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-
       cursor: pointer;
       transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.85, 0.25, 1);
     }
@@ -99,13 +90,7 @@
       transform: translate(-50%, 14px);
     }
 
-    .qnum-tag {
-      font-size: 12px;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.75);
-      flex-shrink: 0;
-    }
-
+    .qnum-tag { font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.75); flex-shrink: 0; }
     .ans-badge {
       font-family: var(--round);
       font-weight: 800;
@@ -117,13 +102,10 @@
       color: #fff;
       flex-shrink: 0;
     }
-
     .ans-badge.err-badge { background: rgba(255, 107, 96, 0.9); }
-
     .ans-line {
       font-size: 14.5px;
       font-weight: 500;
-      letter-spacing: -0.01em;
       color: rgba(255, 255, 255, 0.96);
       white-space: nowrap;
       overflow: hidden;
@@ -139,25 +121,17 @@
     .dots span:nth-child(3) { animation-delay: 0.3s; }
     @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.1); } }
 
-    /* Bottom-right capture button (Portrait & Landscape pinned bottom-right) */
+    /* Bottom-right shutter button (Portrait & Landscape) */
     .shutter-wrap {
       position: fixed;
       right: calc(var(--sr) + 22px);
       bottom: calc(var(--sb) + 20px);
       z-index: 10;
-      display: flex;
-      align-items: center;
     }
 
     @media (orientation: landscape) {
-      .shutter-wrap {
-        right: calc(var(--sr) + 24px);
-        bottom: calc(var(--sb) + 18px);
-      }
-      .glass-answer {
-        bottom: calc(var(--sb) + 22px);
-        max-width: calc(100vw - var(--sl) - var(--sr) - 220px);
-      }
+      .shutter-wrap { right: calc(var(--sr) + 24px); bottom: calc(var(--sb) + 18px); }
+      .glass-answer { bottom: calc(var(--sb) + 22px); max-width: calc(100vw - var(--sl) - var(--sr) - 220px); }
     }
 
     .fab {
@@ -174,7 +148,6 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
       transition: transform 0.12s ease;
     }
-
     .fab::after {
       content: "";
       width: 52px;
@@ -183,15 +156,11 @@
       background: #fff;
       transition: transform 0.12s ease, background 0.15s ease;
     }
-
     .fab:active { transform: scale(0.92); }
-    .fab.busy::after {
-      background: var(--accent);
-      animation: spinPulse 0.9s ease-in-out infinite;
-    }
+    .fab.busy::after { background: var(--accent); animation: spinPulse 0.9s ease-in-out infinite; }
     @keyframes spinPulse { 0%, 100% { transform: scale(0.85); } 50% { transform: scale(1); } }
 
-    /* Sheets */
+    /* History Sheet */
     .scrim {
       position: fixed; inset: 0; z-index: 19; background: rgba(0, 0, 0, 0.55);
       opacity: 0; visibility: hidden; transition: opacity 0.25s, visibility 0.25s;
@@ -225,28 +194,13 @@
     }
     .hitem .row { display: flex; align-items: center; gap: 12px; }
     .hitem .qbadge {
-      font-family: var(--round);
-      font-weight: 700;
-      font-size: 13px;
-      padding: 4px 8px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.12);
-      color: rgba(255, 255, 255, 0.85);
-      flex-shrink: 0;
+      font-family: var(--round); font-weight: 700; font-size: 13px; padding: 4px 8px;
+      border-radius: 8px; background: rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.85); flex-shrink: 0;
     }
     .hitem .hl {
-      font-family: var(--round);
-      font-weight: 800;
-      font-size: 17px;
-      min-width: 34px;
-      height: 34px;
-      padding: 0 8px;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      background: rgba(10, 132, 255, 0.35);
-      color: #fff;
-      flex-shrink: 0;
+      font-family: var(--round); font-weight: 800; font-size: 17px; min-width: 34px; height: 34px;
+      padding: 0 8px; border-radius: 10px; display: grid; place-items: center;
+      background: rgba(10, 132, 255, 0.35); color: #fff; flex-shrink: 0;
     }
     .hitem .ht { flex: 1; min-width: 0; }
     .hitem .hq { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -255,30 +209,18 @@
     .hitem.open .hr { display: block; }
     .hitem.open .hq { white-space: normal; }
 
-    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-    .field label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.65); letter-spacing: 0.05em; text-transform: uppercase; }
-    .field input {
-      border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(255, 255, 255, 0.08); color: #fff; padding: 12px 14px;
-      font-size: 15px; outline: none; width: 100%;
-    }
-    .field small { font-size: 12.5px; line-height: 1.4; color: rgba(255,255,255,0.6); }
-
     .btn {
       appearance: none; border: 0; cursor: pointer; height: 46px; padding: 0 20px;
-      border-radius: 999px; font-size: 16px; font-weight: 600; background: var(--accent); color: #fff; width: 100%;
+      border-radius: 999px; font-size: 16px; font-weight: 600; background: rgba(255, 255, 255, 0.12); color: #fff; width: 100%; margin-top: 10px;
     }
-    .btn.ghost { background: rgba(255, 255, 255, 0.12); margin-top: 10px; }
     .btn.danger { background: transparent; color: var(--bad); margin-top: 8px; font-size: 14px; height: 40px; }
   </style>
 </head>
 <body>
 
-  <!-- Full-screen live camera -->
   <video id="cameraFeed" autoplay playsinline muted></video>
   <canvas id="captureCanvas" class="hidden"></canvas>
 
-  <!-- Top-left Previous Questions button -->
   <button id="histBtn" class="top-btn" type="button" aria-label="Previous questions">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
@@ -287,26 +229,15 @@
     <span id="histCount">Questions (0)</span>
   </button>
 
-  <!-- Top-right Gem URL Settings -->
-  <button id="gear" class="top-btn" type="button" aria-label="Gemini Web Target">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="3.2"/>
-      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
-    </svg>
-  </button>
-
-  <!-- Bottom-center Apple frosted glass one-line answer pill -->
   <div id="answerPill" class="glass-answer hidden-pill" role="button" tabindex="0" aria-live="polite"></div>
 
-  <!-- Bottom-right camera shutter button (stays bottom-right in landscape) -->
   <div class="shutter-wrap">
-    <button id="snapBtn" class="fab" type="button" aria-label="Capture and route to Gemini Pro"></button>
+    <button id="snapBtn" class="fab" type="button" aria-label="Snap and get answer"></button>
   </div>
 
   <input id="fallbackInput" type="file" accept="image/*" capture="environment" class="hidden">
   <div id="scrim" class="scrim"></div>
 
-  <!-- Previous Questions Sheet (Sorted by Question Number) -->
   <aside id="historySheet" class="sheet" aria-label="Previous questions" aria-hidden="true">
     <div class="grab"></div>
     <div class="sheet-head">
@@ -314,21 +245,8 @@
       <span style="font-size:12px;color:rgba(255,255,255,0.6);">Sorted by #</span>
     </div>
     <div id="hist" class="hist"></div>
-    <button class="btn ghost" data-close type="button">Close</button>
+    <button class="btn" data-close type="button">Close</button>
     <button id="clearHist" class="btn danger" type="button">Clear all questions</button>
-  </aside>
-
-  <!-- Target Gem / Gemini Web URL Sheet -->
-  <aside id="settings" class="sheet" aria-label="Gemini Web Target" aria-hidden="true">
-    <div class="grab"></div>
-    <div class="sheet-head"><h2>Gemini Pro Web Target</h2></div>
-    <div class="field">
-      <label for="gemUrl">Gemini Chat or PMP Gem URL</label>
-      <input id="gemUrl" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://gemini.google.com/app">
-      <small>Paste your PMP Textbook Gem URL (e.g. <code>https://gemini.google.com/gem/...</code>) so snaps route directly to your indexed textbooks.</small>
-    </div>
-    <button id="save" class="btn" type="button">Save Target URL</button>
-    <button class="btn ghost" data-close type="button">Done</button>
   </aside>
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -336,15 +254,14 @@
     (function () {
       'use strict';
       var $ = function (id) { return document.getElementById(id); };
-      var CFG_KEY = 'pmpsnap.gemweb.cfg';
-      var HIST_KEY = 'pmpsnap.gemweb.history';
-      var PENDING_KEY = 'pmpsnap.gemweb.pending';
-
-      var cfg = { gemUrl: 'https://gemini.google.com/app' };
-      try { Object.assign(cfg, JSON.parse(localStorage.getItem(CFG_KEY) || '{}')); } catch (e) {}
-
+      var HIST_KEY = 'pmpsnap.silent.history';
       var history = [];
       try { history = JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch (e) {}
+
+      var pendingSnap = null;
+      var timeoutTimer = null;
+      var pill = $('answerPill');
+      var snapBtn = $('snapBtn');
 
       function extractQuestionNum(text) {
         var m = String(text || '').match(/(?:^|\b(?:question|q|#)\s*\.?\s*)(\d{1,4})\b/i);
@@ -364,10 +281,6 @@
         sortHistoryByNumber();
         try { localStorage.setItem(HIST_KEY, JSON.stringify(history.slice(0, 150))); } catch (e) {}
       }
-
-      /* ---------- UI Helpers ---------- */
-      var pill = $('answerPill');
-      var snapBtn = $('snapBtn');
 
       function esc(s) {
         return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -392,55 +305,51 @@
         pill.classList.remove('hidden-pill');
       }
 
-      /* ---------- Handle Automatic Return from Gemini Web Userscript ---------- */
-      function checkIncomingAnswer() {
-        if (!location.hash.includes('ans=')) return;
-        var match = location.hash.match(/ans=([^&]+)/);
-        if (!match) return;
-        history.replaceState(null, '', location.pathname + location.search);
+      /* ---------- Receive Answer Back From Background Gemini Tab ---------- */
+      window.addEventListener('pmp-snap-answer', function (e) {
+        clearTimeout(timeoutTimer);
+        snapBtn.classList.remove('busy');
+        var res = e.detail || {};
 
-        try {
-          var rawResponse = decodeURIComponent(atob(match[1])).trim();
-          var pending = null;
-          try { pending = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null'); } catch (e) {}
-          localStorage.removeItem(PENDING_KEY);
-
-          // Parse option letter + one-line reason from Gemini's reply
-          var letterMatch = rawResponse.match(/\b([A-D])\b\s*[-—:\)\.]\s*(.+)/i);
-          var answerLetter = letterMatch ? letterMatch[1].toUpperCase() : (rawResponse.match(/^\s*([A-D])\b/i) || ['', '?'])[1].toUpperCase();
-          var briefReason = letterMatch ? letterMatch[2].split('\n')[0] : rawResponse.split('\n')[0];
-
-          var qnum = (pending && typeof pending.qnum === 'number') ? pending.qnum : extractQuestionNum(rawResponse);
-          var qSummary = (pending && pending.question) ? pending.question : 'PMP Practice Question';
-
-          showPillAnswer(qnum, answerLetter, briefReason);
-
-          var entry = {
-            t: Date.now(),
-            qnum: qnum,
-            question: qSummary,
-            answer: answerLetter,
-            reason: briefReason,
-            fullResponse: rawResponse
-          };
-
-          if (qnum !== Number.MAX_SAFE_INTEGER) {
-            var idx = history.findIndex(function (h) { return h.qnum === qnum; });
-            if (idx >= 0) history[idx] = entry;
-            else history.push(entry);
-          } else {
-            history.push(entry);
-          }
-
-          saveHistory();
-          renderHistory();
-          if (navigator.vibrate) try { navigator.vibrate(25); } catch (e) {}
-        } catch (e) {
-          showPillError('Could not parse Gemini response');
+        if (res.error) {
+          showPillError(res.error);
+          return;
         }
-      }
 
-      /* ---------- Local Browser OCR ---------- */
+        var rawResponse = String(res.text || '').trim();
+        var letterMatch = rawResponse.match(/\b([A-D])\b\s*[-—:\)\.]\s*(.+)/i);
+        var answerLetter = letterMatch ? letterMatch[1].toUpperCase() : (rawResponse.match(/^\s*([A-D])\b/i) || ['', '?'])[1].toUpperCase();
+        var briefReason = letterMatch ? letterMatch[2].split('\n')[0] : rawResponse.split('\n')[0];
+
+        var qnum = (pendingSnap && typeof pendingSnap.qnum === 'number') ? pendingSnap.qnum : extractQuestionNum(rawResponse);
+        var qSummary = (pendingSnap && pendingSnap.question) ? pendingSnap.question : 'PMP Practice Question';
+        pendingSnap = null;
+
+        showPillAnswer(qnum, answerLetter, briefReason);
+
+        var entry = {
+          t: Date.now(),
+          qnum: qnum,
+          question: qSummary,
+          answer: answerLetter,
+          reason: briefReason,
+          fullResponse: rawResponse
+        };
+
+        if (qnum !== Number.MAX_SAFE_INTEGER) {
+          var idx = history.findIndex(function (h) { return h.qnum === qnum; });
+          if (idx >= 0) history[idx] = entry;
+          else history.push(entry);
+        } else {
+          history.push(entry);
+        }
+
+        saveHistory();
+        renderHistory();
+        if (navigator.vibrate) try { navigator.vibrate(25); } catch (err) {}
+      });
+
+      /* ---------- Local OCR & Live Camera ---------- */
       var ocrWorker = null;
       var ocrInitPromise = null;
 
@@ -455,7 +364,6 @@
         return ocrInitPromise;
       }
 
-      /* ---------- Live Camera ---------- */
       var video = $('cameraFeed');
       var canvas = $('captureCanvas');
       var cameraReady = false;
@@ -489,7 +397,7 @@
         return true;
       }
 
-      async function routeCanvasToGeminiWeb() {
+      async function processSnap() {
         snapBtn.classList.add('busy');
         showPillLoading('Reading question…');
 
@@ -508,22 +416,26 @@
           }
 
           var qnum = extractQuestionNum(rawText);
-          localStorage.setItem(PENDING_KEY, JSON.stringify({
+          pendingSnap = {
             qnum: qnum,
             question: rawText.replace(/\s+/g, ' ').slice(0, 120)
-          }));
+          };
 
           var prompt = [
-            'Using PMI standards (PMBOK 7th Edition & Agile Practice Guide), answer this PMP question.',
+            'Answer this PMP question by PMI standards (PMBOK 7th Edition & Agile Practice Guide).',
             'Reply on the FIRST LINE in this exact format: [Option Letter] - [Strict 1-line brief reason, max 12 words].',
             '',
             rawText
           ].join('\n');
 
-          showPillLoading('Routing to Gemini Pro…');
-          var encodedPayload = btoa(encodeURIComponent(JSON.stringify({ prompt: prompt })));
-          var baseTarget = (cfg.gemUrl || 'https://gemini.google.com/app').split('#')[0];
-          window.location.href = baseTarget + '#pmpsnap=' + encodedPayload;
+          showPillLoading('Getting answer…');
+          clearTimeout(timeoutTimer);
+          timeoutTimer = setTimeout(function () {
+            snapBtn.classList.remove('busy');
+            showPillError('No response — keep Gemini PMP tab open in Edge');
+          }, 35000);
+
+          window.dispatchEvent(new CustomEvent('pmp-snap-request', { detail: { prompt: prompt } }));
         } catch (e) {
           showPillError('Failed to capture question');
           snapBtn.classList.remove('busy');
@@ -537,7 +449,7 @@
         $('histCount').textContent = 'Questions (' + history.length + ')';
 
         if (!history.length) {
-          box.innerHTML = '<div style="color:rgba(255,255,255,0.6);font-size:14px;padding:8px 2px;">Snapped questions and answers from Gemini Pro appear here sorted by question number.</div>';
+          box.innerHTML = '<div style="color:rgba(255,255,255,0.6);font-size:14px;padding:8px 2px;">Snapped questions appear here sorted by question number.</div>';
           return;
         }
 
@@ -561,43 +473,32 @@
         });
       }
 
-      /* ---------- Events ---------- */
       $('snapBtn').addEventListener('click', function () {
         if (cameraReady && drawVideoToCanvas()) {
-          routeCanvasToGeminiWeb();
+          processSnap();
           return;
         }
         $('fallbackInput').value = '';
         $('fallbackInput').click();
       });
 
-      $('answerPill').addEventListener('click', function () { openSheet('historySheet'); });
-      $('histBtn').addEventListener('click', function () { openSheet('historySheet'); });
-      $('gear').addEventListener('click', function () { openSheet('settings'); });
+      $('answerPill').addEventListener('click', openHistory);
+      $('histBtn').addEventListener('click', openHistory);
 
-      function openSheet(id) {
-        closeSheets();
-        if (id === 'settings') $('gemUrl').value = cfg.gemUrl;
-        $(id).classList.add('open');
-        $(id).setAttribute('aria-hidden', 'false');
+      function openHistory() {
+        $('historySheet').classList.add('open');
+        $('historySheet').setAttribute('aria-hidden', 'false');
         document.body.classList.add('sheet-open');
       }
 
-      function closeSheets() {
-        ['settings', 'historySheet'].forEach(function (id) {
-          $(id).classList.remove('open');
-          $(id).setAttribute('aria-hidden', 'true');
-        });
+      function closeHistory() {
+        $('historySheet').classList.remove('open');
+        $('historySheet').setAttribute('aria-hidden', 'true');
         document.body.classList.remove('sheet-open');
       }
-      document.querySelectorAll('[data-close]').forEach(function (b) { b.addEventListener('click', closeSheets); });
-      $('scrim').addEventListener('click', closeSheets);
 
-      $('save').addEventListener('click', function () {
-        cfg.gemUrl = $('gemUrl').value.trim() || 'https://gemini.google.com/app';
-        try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (e) {}
-        closeSheets();
-      });
+      document.querySelectorAll('[data-close]').forEach(function (b) { b.addEventListener('click', closeHistory); });
+      $('scrim').addEventListener('click', closeHistory);
 
       $('clearHist').addEventListener('click', function () {
         if ($('clearHist').dataset.confirm !== '1') {
@@ -623,18 +524,15 @@
             canvas.width = Math.round(im.width * s);
             canvas.height = Math.round(im.height * s);
             canvas.getContext('2d').drawImage(im, 0, 0, canvas.width, canvas.height);
-            routeCanvasToGeminiWeb();
+            processSnap();
           };
           im.src = reader.result;
         };
         reader.readAsDataURL(file);
       });
 
-      /* ---------- Boot ---------- */
-      checkIncomingAnswer();
       renderHistory();
       startCamera();
-      window.addEventListener('hashchange', checkIncomingAnswer);
       if ('serviceWorker' in navigator && location.protocol === 'https:') {
         navigator.serviceWorker.register('sw.js').catch(function () {});
       }
