@@ -41,7 +41,7 @@
       background: #000;
     }
 
-    /* Top floating controls (History top-left, Settings top-right) */
+    /* Top floating controls */
     .top-btn {
       position: fixed;
       top: calc(var(--st) + 16px);
@@ -74,9 +74,8 @@
       transform: translateX(-50%);
       z-index: 10;
 
-      /* Clearance for bottom-right shutter in both portrait & landscape */
       max-width: calc(100vw - var(--sl) - var(--sr) - 195px);
-      min-width: 160px;
+      min-width: 175px;
 
       display: flex;
       align-items: center;
@@ -84,8 +83,7 @@
       padding: 10px 18px;
       border-radius: 999px;
 
-      /* Apple iOS Translucent Glass */
-      background: rgba(28, 28, 30, 0.54);
+      background: rgba(28, 28, 30, 0.56);
       backdrop-filter: blur(24px) saturate(190%);
       -webkit-backdrop-filter: blur(24px) saturate(190%);
       border: 1px solid rgba(255, 255, 255, 0.24);
@@ -104,26 +102,8 @@
     .qnum-tag {
       font-size: 12px;
       font-weight: 700;
-      color: rgba(255, 255, 255, 0.72);
+      color: rgba(255, 255, 255, 0.75);
       flex-shrink: 0;
-    }
-
-    .mode-tag {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      padding: 3px 6px;
-      border-radius: 6px;
-      background: rgba(48, 209, 88, 0.22);
-      color: #63e685;
-      border: 1px solid rgba(48, 209, 88, 0.35);
-      flex-shrink: 0;
-    }
-
-    .mode-tag.img-mode {
-      background: rgba(255, 255, 255, 0.12);
-      color: rgba(255, 255, 255, 0.72);
-      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .ans-badge {
@@ -133,12 +113,12 @@
       line-height: 1;
       padding: 6px 10px;
       border-radius: 999px;
-      background: rgba(10, 132, 255, 0.88);
+      background: rgba(10, 132, 255, 0.9);
       color: #fff;
       flex-shrink: 0;
     }
 
-    .ans-badge.err-badge { background: rgba(255, 107, 96, 0.88); }
+    .ans-badge.err-badge { background: rgba(255, 107, 96, 0.9); }
 
     .ans-line {
       font-size: 14.5px;
@@ -150,7 +130,6 @@
       text-overflow: ellipsis;
     }
 
-    /* Loading dots */
     .dots { display: flex; gap: 5px; padding: 4px 2px; }
     .dots span {
       width: 7px; height: 7px; border-radius: 50%; background: #fff; opacity: 0.35;
@@ -212,7 +191,7 @@
     }
     @keyframes spinPulse { 0%, 100% { transform: scale(0.85); } 50% { transform: scale(1); } }
 
-    /* Bottom Sheets (History & Settings) */
+    /* Sheets */
     .scrim {
       position: fixed; inset: 0; z-index: 19; background: rgba(0, 0, 0, 0.55);
       opacity: 0; visibility: hidden; transition: opacity 0.25s, visibility 0.25s;
@@ -236,7 +215,6 @@
     .sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
     .sheet h2 { font-size: 20px; font-weight: 700; }
 
-    /* Sorted History List */
     .hist { display: flex; flex-direction: column; gap: 10px; }
     .hitem {
       background: rgba(255, 255, 255, 0.07);
@@ -277,7 +255,6 @@
     .hitem.open .hr { display: block; }
     .hitem.open .hq { white-space: normal; }
 
-    /* Form fields */
     .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
     .field label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.65); letter-spacing: 0.05em; text-transform: uppercase; }
     .field input {
@@ -285,34 +262,13 @@
       background: rgba(255, 255, 255, 0.08); color: #fff; padding: 12px 14px;
       font-size: 15px; outline: none; width: 100%;
     }
-    .field input:focus { border-color: var(--accent); }
     .field small { font-size: 12.5px; line-height: 1.4; color: rgba(255,255,255,0.6); }
-    .field a { color: #7cc0ff; }
-    .seg {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px;
-      border-radius: 12px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14);
-    }
-    .seg button {
-      appearance: none; border: 0; background: transparent; height: 36px; border-radius: 9px;
-      font-size: 14px; font-weight: 600; cursor: pointer; color: rgba(255,255,255,0.65);
-    }
-    .seg button[aria-pressed="true"] { background: #fff; color: #000; }
-    .toggle-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.14); margin-bottom: 14px;
-    }
-    .toggle-row span { font-size: 14px; font-weight: 600; }
-    .toggle-row small { display: block; font-size: 11.5px; color: rgba(255,255,255,0.6); font-weight: 400; }
-    .toggle-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
-    .status { min-height: 18px; margin: -2px 0 12px; font-size: 13.5px; font-weight: 600; }
-    .status.ok { color: var(--ok); }
-    .status.bad { color: var(--bad); }
+
     .btn {
       appearance: none; border: 0; cursor: pointer; height: 46px; padding: 0 20px;
       border-radius: 999px; font-size: 16px; font-weight: 600; background: var(--accent); color: #fff; width: 100%;
     }
-    .btn.ghost { background: rgba(255, 255, 255, 0.12); margin-top: 8px; }
+    .btn.ghost { background: rgba(255, 255, 255, 0.12); margin-top: 10px; }
     .btn.danger { background: transparent; color: var(--bad); margin-top: 8px; font-size: 14px; height: 40px; }
   </style>
 </head>
@@ -331,8 +287,8 @@
     <span id="histCount">Questions (0)</span>
   </button>
 
-  <!-- Top-right Settings button -->
-  <button id="gear" class="top-btn" type="button" aria-label="Settings">
+  <!-- Top-right Gem URL Settings -->
+  <button id="gear" class="top-btn" type="button" aria-label="Gemini Web Target">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="3.2"/>
       <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
@@ -344,7 +300,7 @@
 
   <!-- Bottom-right camera shutter button (stays bottom-right in landscape) -->
   <div class="shutter-wrap">
-    <button id="snapBtn" class="fab" type="button" aria-label="Capture and solve"></button>
+    <button id="snapBtn" class="fab" type="button" aria-label="Capture and route to Gemini Pro"></button>
   </div>
 
   <input id="fallbackInput" type="file" accept="image/*" capture="environment" class="hidden">
@@ -358,79 +314,47 @@
       <span style="font-size:12px;color:rgba(255,255,255,0.6);">Sorted by #</span>
     </div>
     <div id="hist" class="hist"></div>
-    <button class="btn ghost" data-close type="button" style="margin-top:14px;">Close</button>
+    <button class="btn ghost" data-close type="button">Close</button>
     <button id="clearHist" class="btn danger" type="button">Clear all questions</button>
   </aside>
 
-  <!-- Settings Sheet -->
-  <aside id="settings" class="sheet" aria-label="Settings" aria-hidden="true">
+  <!-- Target Gem / Gemini Web URL Sheet -->
+  <aside id="settings" class="sheet" aria-label="Gemini Web Target" aria-hidden="true">
     <div class="grab"></div>
-    <div class="sheet-head"><h2>Settings</h2></div>
+    <div class="sheet-head"><h2>Gemini Pro Web Target</h2></div>
     <div class="field">
-      <label for="key">Gemini API key</label>
-      <input id="key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste your key">
-      <small>Free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Saved locally on this device.</small>
+      <label for="gemUrl">Gemini Chat or PMP Gem URL</label>
+      <input id="gemUrl" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://gemini.google.com/app">
+      <small>Paste your PMP Textbook Gem URL (e.g. <code>https://gemini.google.com/gem/...</code>) so snaps route directly to your indexed textbooks.</small>
     </div>
-    <div class="field">
-      <label for="model">Model</label>
-      <input id="model" type="text" list="models" autocomplete="off" autocapitalize="off" spellcheck="false">
-      <datalist id="models"></datalist>
-    </div>
-    <div class="field">
-      <label id="speedLabel">Speed</label>
-      <div class="seg" role="group" aria-labelledby="speedLabel">
-        <button type="button" data-level="low" aria-pressed="true">Fast</button>
-        <button type="button" data-level="medium" aria-pressed="false">Balanced</button>
-        <button type="button" data-level="high" aria-pressed="false">Best</button>
-      </div>
-    </div>
-    <label class="toggle-row" for="useOcr">
-      <div>
-        <span>Smart OCR Token Saver</span>
-        <small>Extracts text on-device first; falls back to image if glare/diagram</small>
-      </div>
-      <input id="useOcr" type="checkbox" checked>
-    </label>
-    <div id="saveStatus" class="status" role="status"></div>
-    <button id="save" class="btn" type="button">Save and test</button>
+    <button id="save" class="btn" type="button">Save Target URL</button>
     <button class="btn ghost" data-close type="button">Done</button>
   </aside>
 
-  <!-- Tesseract.js v5 for local browser OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script>
     (function () {
       'use strict';
       var $ = function (id) { return document.getElementById(id); };
-      var STORE = 'pmpsnap.v2', HIST = 'pmpsnap.history';
-      var API = localStorage.getItem('pmpsnap.api') || 'https://generativelanguage.googleapis.com/v1beta/';
-      var cfg = { key: '', model: 'gemini-flash-latest', level: 'low', useOcr: true };
+      var CFG_KEY = 'pmpsnap.gemweb.cfg';
+      var HIST_KEY = 'pmpsnap.gemweb.history';
+      var PENDING_KEY = 'pmpsnap.gemweb.pending';
 
-      try {
-        var old = JSON.parse(localStorage.getItem('pmpsnap.v1') || '{}');
-        if (old.key) cfg.key = old.key;
-      } catch (e) {}
-      try {
-        Object.assign(cfg, JSON.parse(localStorage.getItem(STORE) || '{}'));
-      } catch (e) {}
-
-      function persist() {
-        try { localStorage.setItem(STORE, JSON.stringify(cfg)); } catch (e) {}
-      }
+      var cfg = { gemUrl: 'https://gemini.google.com/app' };
+      try { Object.assign(cfg, JSON.parse(localStorage.getItem(CFG_KEY) || '{}')); } catch (e) {}
 
       var history = [];
-      try { history = JSON.parse(localStorage.getItem(HIST) || '[]'); } catch (e) {}
+      try { history = JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch (e) {}
 
-      function extractQuestionNum(item) {
-        if (typeof item.qnum === 'number' && !isNaN(item.qnum)) return item.qnum;
-        var m = String(item.question || '').match(/(?:^|\b(?:question|q|#)\s*\.?\s*)(\d{1,4})\b/i);
+      function extractQuestionNum(text) {
+        var m = String(text || '').match(/(?:^|\b(?:question|q|#)\s*\.?\s*)(\d{1,4})\b/i);
         return m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER;
       }
 
       function sortHistoryByNumber() {
         history.sort(function (a, b) {
-          var na = extractQuestionNum(a);
-          var nb = extractQuestionNum(b);
+          var na = typeof a.qnum === 'number' ? a.qnum : extractQuestionNum(a.question);
+          var nb = typeof b.qnum === 'number' ? b.qnum : extractQuestionNum(b.question);
           if (na !== nb) return na - nb;
           return (a.t || 0) - (b.t || 0);
         });
@@ -438,15 +362,85 @@
 
       function saveHistory() {
         sortHistoryByNumber();
+        try { localStorage.setItem(HIST_KEY, JSON.stringify(history.slice(0, 150))); } catch (e) {}
+      }
+
+      /* ---------- UI Helpers ---------- */
+      var pill = $('answerPill');
+      var snapBtn = $('snapBtn');
+
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      function showPillLoading(msg) {
+        pill.innerHTML = '<div class="dots"><span></span><span></span><span></span></div><span class="ans-line">' + esc(msg) + '</span>';
+        pill.classList.remove('hidden-pill');
+      }
+
+      function showPillAnswer(qnum, answer, reason) {
+        var cleanReason = String(reason || '').replace(/\s+/g, ' ').trim();
+        var qLabel = (qnum !== Number.MAX_SAFE_INTEGER) ? '<span class="qnum-tag">Q' + esc(qnum) + '</span>' : '';
+        pill.innerHTML = qLabel + '<span class="ans-badge">' + esc(answer) + '</span><span class="ans-line">' + esc(cleanReason) + '</span>';
+        pill.classList.remove('hidden-pill');
+      }
+
+      function showPillError(msg) {
+        pill.innerHTML = '<span class="ans-badge err-badge">!</span><span class="ans-line">' + esc(msg) + '</span>';
+        pill.classList.remove('hidden-pill');
+      }
+
+      /* ---------- Handle Automatic Return from Gemini Web Userscript ---------- */
+      function checkIncomingAnswer() {
+        if (!location.hash.includes('ans=')) return;
+        var match = location.hash.match(/ans=([^&]+)/);
+        if (!match) return;
+        history.replaceState(null, '', location.pathname + location.search);
+
         try {
-          localStorage.setItem(HIST, JSON.stringify(history.slice(0, 150)));
+          var rawResponse = decodeURIComponent(atob(match[1])).trim();
+          var pending = null;
+          try { pending = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null'); } catch (e) {}
+          localStorage.removeItem(PENDING_KEY);
+
+          // Parse option letter + one-line reason from Gemini's reply
+          var letterMatch = rawResponse.match(/\b([A-D])\b\s*[-—:\)\.]\s*(.+)/i);
+          var answerLetter = letterMatch ? letterMatch[1].toUpperCase() : (rawResponse.match(/^\s*([A-D])\b/i) || ['', '?'])[1].toUpperCase();
+          var briefReason = letterMatch ? letterMatch[2].split('\n')[0] : rawResponse.split('\n')[0];
+
+          var qnum = (pending && typeof pending.qnum === 'number') ? pending.qnum : extractQuestionNum(rawResponse);
+          var qSummary = (pending && pending.question) ? pending.question : 'PMP Practice Question';
+
+          showPillAnswer(qnum, answerLetter, briefReason);
+
+          var entry = {
+            t: Date.now(),
+            qnum: qnum,
+            question: qSummary,
+            answer: answerLetter,
+            reason: briefReason,
+            fullResponse: rawResponse
+          };
+
+          if (qnum !== Number.MAX_SAFE_INTEGER) {
+            var idx = history.findIndex(function (h) { return h.qnum === qnum; });
+            if (idx >= 0) history[idx] = entry;
+            else history.push(entry);
+          } else {
+            history.push(entry);
+          }
+
+          saveHistory();
+          renderHistory();
+          if (navigator.vibrate) try { navigator.vibrate(25); } catch (e) {}
         } catch (e) {
-          history = history.slice(0, 60);
-          try { localStorage.setItem(HIST, JSON.stringify(history)); } catch (e2) {}
+          showPillError('Could not parse Gemini response');
         }
       }
 
-      /* ---------- Local Browser OCR (Tesseract.js) ---------- */
+      /* ---------- Local Browser OCR ---------- */
       var ocrWorker = null;
       var ocrInitPromise = null;
 
@@ -455,38 +449,13 @@
         if (ocrWorker) return Promise.resolve(ocrWorker);
         if (!ocrInitPromise) {
           ocrInitPromise = Tesseract.createWorker('eng')
-            .then(function (w) {
-              ocrWorker = w;
-              return w;
-            })
-            .catch(function () {
-              ocrInitPromise = null;
-              return null;
-            });
+            .then(function (w) { ocrWorker = w; return w; })
+            .catch(function () { ocrInitPromise = null; return null; });
         }
         return ocrInitPromise;
       }
 
-      async function runLocalOCR(canvasEl) {
-        if (!cfg.useOcr) return null;
-        var worker = await getOcrWorker();
-        if (!worker) return null;
-        try {
-          var ret = await worker.recognize(canvasEl);
-          var rawText = (ret && ret.data && ret.data.text) ? ret.data.text.replace(/\n{3,}/g, '\n\n').trim() : '';
-          var confidence = (ret && ret.data && typeof ret.data.confidence === 'number') ? ret.data.confidence : 0;
-          // Quality gate: require decent OCR confidence, >= 45 chars, and multiple-choice markers (A/B/C/D)
-          var hasOptions = /(?:^|\s)[A-D][\.\)\:]\s+/m.test(rawText);
-          if (confidence >= 52 && rawText.length >= 45 && hasOptions) {
-            return rawText;
-          }
-          return null;
-        } catch (e) {
-          return null;
-        }
-      }
-
-      /* ---------- Live Camera Initialization ---------- */
+      /* ---------- Live Camera ---------- */
       var video = $('cameraFeed');
       var canvas = $('captureCanvas');
       var cameraReady = false;
@@ -502,8 +471,7 @@
           video.onloadedmetadata = function () {
             video.play();
             cameraReady = true;
-            // Pre-warm OCR worker quietly after camera starts
-            if (cfg.useOcr) setTimeout(getOcrWorker, 800);
+            setTimeout(getOcrWorker, 500);
           };
         } catch (err) {
           showPillError('Camera blocked — tap shutter to pick photo');
@@ -514,51 +482,52 @@
         var w = video.videoWidth;
         var h = video.videoHeight;
         if (!w || !h) return false;
-        var scale = Math.min(1, 1280 / Math.max(w, h));
+        var scale = Math.min(1, 1400 / Math.max(w, h));
         canvas.width = Math.round(w * scale);
         canvas.height = Math.round(h * scale);
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         return true;
       }
 
-      /* ---------- Prompt (Extracts question number + strict 1-line brief answer) ---------- */
-      var SYSTEM = [
-        'You are a PMP exam coach. Analyze the practice question provided.',
-        'Answer by PMI standards (PMBOK Guide 7th edition, Agile Practice Guide).',
-        'Extract the visible question number as an integer in "qnum" (or null if none is visible).',
-        'Reply with JSON only in this exact shape:',
-        '{"found": true, "qnum": 12, "question": "<brief question summary in max 16 words>", "answer": "B", "reason": "<strictly ONE brief line, max 12 words, explaining why>", "others": [{"option": "A", "why": "<max 12 words>"}], "domain": "People | Process | Business Environment"}',
-        'If there is no readable question, reply {"found": false}.'
-      ].join(' ');
+      async function routeCanvasToGeminiWeb() {
+        snapBtn.classList.add('busy');
+        showPillLoading('Reading question…');
 
-      function esc(s) {
-        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-        });
-      }
+        try {
+          var worker = await getOcrWorker();
+          var rawText = '';
+          if (worker) {
+            var ret = await worker.recognize(canvas);
+            rawText = (ret && ret.data && ret.data.text) ? ret.data.text.replace(/\n{3,}/g, '\n\n').trim() : '';
+          }
 
-      /* ---------- Glass Pill & History Rendering ---------- */
-      var pill = $('answerPill');
-      var snapBtn = $('snapBtn');
+          if (!rawText || rawText.length < 25) {
+            showPillError('Text unclear — move closer & retry');
+            snapBtn.classList.remove('busy');
+            return;
+          }
 
-      function showPillLoading(stageText) {
-        pill.innerHTML = '<div class="dots"><span></span><span></span><span></span></div><span class="ans-line">' + esc(stageText || 'Analyzing…') + '</span>';
-        pill.classList.remove('hidden-pill');
-      }
+          var qnum = extractQuestionNum(rawText);
+          localStorage.setItem(PENDING_KEY, JSON.stringify({
+            qnum: qnum,
+            question: rawText.replace(/\s+/g, ' ').slice(0, 120)
+          }));
 
-      function showPillAnswer(qnum, answer, reason, usedOcr) {
-        var cleanReason = String(reason || '').replace(/\s+/g, ' ').trim();
-        var qLabel = (typeof qnum === 'number' && !isNaN(qnum)) ? '<span class="qnum-tag">Q' + esc(qnum) + '</span>' : '';
-        var modeBadge = usedOcr
-          ? '<span class="mode-tag">OCR</span>'
-          : '<span class="mode-tag img-mode">IMG</span>';
-        pill.innerHTML = qLabel + '<span class="ans-badge">' + esc(answer) + '</span><span class="ans-line">' + esc(cleanReason) + '</span>' + modeBadge;
-        pill.classList.remove('hidden-pill');
-      }
+          var prompt = [
+            'Using PMI standards (PMBOK 7th Edition & Agile Practice Guide), answer this PMP question.',
+            'Reply on the FIRST LINE in this exact format: [Option Letter] - [Strict 1-line brief reason, max 12 words].',
+            '',
+            rawText
+          ].join('\n');
 
-      function showPillError(msg) {
-        pill.innerHTML = '<span class="ans-badge err-badge">!</span><span class="ans-line">' + esc(msg) + '</span>';
-        pill.classList.remove('hidden-pill');
+          showPillLoading('Routing to Gemini Pro…');
+          var encodedPayload = btoa(encodeURIComponent(JSON.stringify({ prompt: prompt })));
+          var baseTarget = (cfg.gemUrl || 'https://gemini.google.com/app').split('#')[0];
+          window.location.href = baseTarget + '#pmpsnap=' + encodedPayload;
+        } catch (e) {
+          showPillError('Failed to capture question');
+          snapBtn.classList.remove('busy');
+        }
       }
 
       function renderHistory() {
@@ -568,222 +537,47 @@
         $('histCount').textContent = 'Questions (' + history.length + ')';
 
         if (!history.length) {
-          box.innerHTML = '<div style="color:rgba(255,255,255,0.6);font-size:14px;padding:8px 2px;">Snapped questions will appear here sorted by question number.</div>';
+          box.innerHTML = '<div style="color:rgba(255,255,255,0.6);font-size:14px;padding:8px 2px;">Snapped questions and answers from Gemini Pro appear here sorted by question number.</div>';
           return;
         }
 
         history.forEach(function (h) {
-          var num = extractQuestionNum(h);
-          var numLabel = num !== Number.MAX_SAFE_INTEGER ? 'Q' + num : 'Q—';
+          var numLabel = h.qnum !== Number.MAX_SAFE_INTEGER ? 'Q' + h.qnum : 'Q—';
           var el = document.createElement('div');
           el.className = 'hitem';
-          el.setAttribute('role', 'button');
-          el.tabIndex = 0;
-
-          var othersHtml = (h.others && h.others.length)
-            ? '<div style="margin-top:8px;">' + h.others.map(function (o) {
-                return '<div><b>' + esc(o.option) + ':</b> ' + esc(o.why) + '</div>';
-              }).join('') + '</div>'
-            : '';
-
           el.innerHTML =
             '<div class="row">' +
               '<div class="qbadge">' + esc(numLabel) + '</div>' +
               '<div class="hl">' + esc(h.answer) + '</div>' +
               '<div class="ht">' +
-                '<div class="hq">' + esc(h.question || 'Practice question') + '</div>' +
-                '<div class="hs">' + esc(h.reason || '') + '</div>' +
+                '<div class="hq">' + esc(h.question) + '</div>' +
+                '<div class="hs">' + esc(h.reason) + '</div>' +
               '</div>' +
             '</div>' +
-            '<div class="hr">' +
-              '<div><b>Why ' + esc(h.answer) + ':</b> ' + esc(h.reason || '') + '</div>' +
-              othersHtml +
-            '</div>';
+            '<div class="hr">' + esc(h.fullResponse || h.reason) + '</div>';
 
           el.addEventListener('click', function () { el.classList.toggle('open'); });
           box.appendChild(el);
         });
       }
 
-      /* ---------- Gemini API Call (Text-only OCR or Image Fallback) ---------- */
-      async function callGemini(payload, signal, level) {
-        var gen = { responseMimeType: 'application/json' };
-        if (level) gen.thinkingConfig = { thinkingLevel: level };
-
-        var userParts = payload.ocrText
-          ? [{ text: 'Solve this PMP question in one brief line and extract its question number:\n\n' + payload.ocrText }]
-          : [
-              { text: 'Solve this question in one brief line and extract its question number.' },
-              { inlineData: { mimeType: 'image/jpeg', data: payload.base64Data } }
-            ];
-
-        var r = await fetch(API + 'models/' + encodeURIComponent(cfg.model) + ':generateContent', {
-          method: 'POST',
-          signal: signal,
-          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': cfg.key },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: SYSTEM }] },
-            contents: [{ role: 'user', parts: userParts }],
-            generationConfig: gen
-          })
-        });
-        var j = {};
-        try { j = await r.json(); } catch (e) {}
-        if (!r.ok) {
-          var err = new Error((j.error && j.error.message) || ('HTTP ' + r.status));
-          err.status = r.status;
-          throw err;
-        }
-        var cand = (j.candidates || [])[0] || {};
-        return ((cand.content && cand.content.parts) || [])
-          .filter(function (p) { return p.text && !p.thought; })
-          .map(function (p) { return p.text; })
-          .join('')
-          .trim();
-      }
-
-      function parseResult(text) {
-        var t = String(text || '').replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
-        try {
-          var o = JSON.parse(t);
-          if (o && typeof o === 'object') return o;
-        } catch (e) {}
-        var m = t.match(/\{[\s\S]*\}/);
-        if (m) {
-          try { return JSON.parse(m[0]); } catch (e) {}
-        }
-        return { found: true, qnum: null, answer: '?', reason: t.slice(0, 120) };
-      }
-
-      var ctl = null;
-      async function solveCanvas() {
-        if (!cfg.key) {
-          openSheet('settings', 'Add your Gemini API key to start.', 'bad');
-          return;
-        }
-        if (ctl) ctl.abort();
-        var mine = ctl = new AbortController();
-        var timer = setTimeout(function () { mine.abort(); }, 28000);
-
-        snapBtn.classList.add('busy');
-
-        try {
-          var ocrText = null;
-          if (cfg.useOcr) {
-            showPillLoading('Reading text…');
-            ocrText = await runLocalOCR(canvas);
-            if (mine !== ctl) return;
-          }
-
-          var payload = ocrText
-            ? { ocrText: ocrText }
-            : { base64Data: canvas.toDataURL('image/jpeg', 0.82).split(',')[1] };
-
-          showPillLoading(ocrText ? 'Solving text…' : 'Solving image…');
-
-          var raw;
-          try {
-            raw = await callGemini(payload, mine.signal, cfg.level);
-          } catch (e) {
-            if (e.status === 400 && /thinking/i.test(e.message || '')) {
-              raw = await callGemini(payload, mine.signal, null);
-            } else {
-              throw e;
-            }
-          }
-          if (mine !== ctl) return;
-          var res = parseResult(raw);
-          if (res.found === false) {
-            showPillError('No readable question found');
-            return;
-          }
-
-          var parsedNum = (res.qnum != null && !isNaN(parseInt(res.qnum, 10))) ? parseInt(res.qnum, 10) : null;
-          var ansLetter = String(res.answer || '?').toUpperCase();
-
-          showPillAnswer(parsedNum, ansLetter, res.reason, Boolean(ocrText));
-
-          var entry = {
-            t: Date.now(),
-            qnum: parsedNum,
-            question: res.question || 'Practice question',
-            answer: ansLetter,
-            reason: res.reason || '',
-            others: Array.isArray(res.others) ? res.others : [],
-            domain: res.domain || ''
-          };
-
-          if (parsedNum !== null) {
-            var existingIdx = history.findIndex(function (h) { return extractQuestionNum(h) === parsedNum; });
-            if (existingIdx >= 0) history[existingIdx] = entry;
-            else history.push(entry);
-          } else {
-            history.push(entry);
-          }
-
-          saveHistory();
-          renderHistory();
-
-          if (navigator.vibrate) try { navigator.vibrate(25); } catch (e) {}
-        } catch (e) {
-          if (mine !== ctl) return;
-          if (e.name === 'AbortError') showPillError('Request timed out — try again');
-          else if (e.status === 429) showPillError('Rate limit reached — wait a moment');
-          else if (e.status === 401 || e.status === 403 || e.status === 400) showPillError('Invalid API key — check Settings');
-          else showPillError('Connection error — try again');
-        } finally {
-          clearTimeout(timer);
-          if (mine === ctl) snapBtn.classList.remove('busy');
-        }
-      }
-
-      /* ---------- Shutter Click, Pill Click & Fallback ---------- */
+      /* ---------- Events ---------- */
       $('snapBtn').addEventListener('click', function () {
         if (cameraReady && drawVideoToCanvas()) {
-          solveCanvas();
+          routeCanvasToGeminiWeb();
           return;
         }
         $('fallbackInput').value = '';
         $('fallbackInput').click();
       });
 
-      $('answerPill').addEventListener('click', function () {
-        openSheet('historySheet');
-      });
+      $('answerPill').addEventListener('click', function () { openSheet('historySheet'); });
+      $('histBtn').addEventListener('click', function () { openSheet('historySheet'); });
+      $('gear').addEventListener('click', function () { openSheet('settings'); });
 
-      $('histBtn').addEventListener('click', function () {
-        openSheet('historySheet');
-      });
-
-      $('fallbackInput').addEventListener('change', function (e) {
-        var file = e.target.files[0];
-        if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function () {
-          var im = new Image();
-          im.onload = function () {
-            var s = Math.min(1, 1280 / Math.max(im.width, im.height));
-            canvas.width = Math.round(im.width * s);
-            canvas.height = Math.round(im.height * s);
-            canvas.getContext('2d').drawImage(im, 0, 0, canvas.width, canvas.height);
-            solveCanvas();
-          };
-          im.src = reader.result;
-        };
-        reader.readAsDataURL(file);
-      });
-
-      /* ---------- Sheets Management ---------- */
-      function openSheet(id, note, kind) {
+      function openSheet(id) {
         closeSheets();
-        if (id === 'settings') {
-          $('key').value = cfg.key;
-          $('model').value = cfg.model;
-          $('useOcr').checked = cfg.useOcr !== false;
-          setLevel(cfg.level);
-          $('saveStatus').textContent = note || '';
-          $('saveStatus').className = 'status' + (kind ? ' ' + kind : '');
-        }
+        if (id === 'settings') $('gemUrl').value = cfg.gemUrl;
         $(id).classList.add('open');
         $(id).setAttribute('aria-hidden', 'false');
         document.body.classList.add('sheet-open');
@@ -796,21 +590,14 @@
         });
         document.body.classList.remove('sheet-open');
       }
-
-      function setLevel(level) {
-        document.querySelectorAll('.seg button').forEach(function (b) {
-          b.setAttribute('aria-pressed', b.dataset.level === level ? 'true' : 'false');
-        });
-      }
-
-      document.querySelectorAll('.seg button').forEach(function (b) {
-        b.addEventListener('click', function () { setLevel(b.dataset.level); });
-      });
-      document.querySelectorAll('[data-close]').forEach(function (b) {
-        b.addEventListener('click', closeSheets);
-      });
+      document.querySelectorAll('[data-close]').forEach(function (b) { b.addEventListener('click', closeSheets); });
       $('scrim').addEventListener('click', closeSheets);
-      $('gear').addEventListener('click', function () { openSheet('settings'); });
+
+      $('save').addEventListener('click', function () {
+        cfg.gemUrl = $('gemUrl').value.trim() || 'https://gemini.google.com/app';
+        try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (e) {}
+        closeSheets();
+      });
 
       $('clearHist').addEventListener('click', function () {
         if ($('clearHist').dataset.confirm !== '1') {
@@ -825,54 +612,29 @@
         $('clearHist').textContent = 'Clear all questions';
       });
 
-      $('save').addEventListener('click', async function () {
-        var level = 'low';
-        document.querySelectorAll('.seg button').forEach(function (b) {
-          if (b.getAttribute('aria-pressed') === 'true') level = b.dataset.level;
-        });
-        cfg.key = $('key').value.trim();
-        cfg.model = $('model').value.trim() || 'gemini-flash-latest';
-        cfg.level = level;
-        cfg.useOcr = $('useOcr').checked;
-        persist();
-
-        var st = $('saveStatus');
-        if (!cfg.key) {
-          st.textContent = 'Add an API key to get answers.';
-          st.className = 'status bad';
-          return;
-        }
-        st.textContent = 'Checking key…';
-        st.className = 'status';
-        try {
-          var r = await fetch(API + 'models?pageSize=200', { headers: { 'x-goog-api-key': cfg.key } });
-          var j = await r.json();
-          if (!r.ok) throw new Error((j.error && j.error.message) || 'Invalid key');
-          var names = (j.models || [])
-            .filter(function (m) { return (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0; })
-            .map(function (m) { return m.name.replace(/^models\//, ''); })
-            .filter(function (n) { return /^gemini/.test(n) && !/(image|tts|live|audio|embedding)/.test(n); });
-          var dl = $('models');
-          dl.textContent = '';
-          names.forEach(function (n) {
-            var o = document.createElement('option');
-            o.value = n;
-            dl.appendChild(o);
-          });
-          st.textContent = 'Key works.';
-          st.className = 'status ok';
-        } catch (e) {
-          st.textContent = e.message || 'Key check failed.';
-          st.className = 'status bad';
-        }
+      $('fallbackInput').addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function () {
+          var im = new Image();
+          im.onload = function () {
+            var s = Math.min(1, 1400 / Math.max(im.width, im.height));
+            canvas.width = Math.round(im.width * s);
+            canvas.height = Math.round(im.height * s);
+            canvas.getContext('2d').drawImage(im, 0, 0, canvas.width, canvas.height);
+            routeCanvasToGeminiWeb();
+          };
+          im.src = reader.result;
+        };
+        reader.readAsDataURL(file);
       });
 
       /* ---------- Boot ---------- */
+      checkIncomingAnswer();
       renderHistory();
       startCamera();
-      if (!cfg.key) {
-        setTimeout(function () { openSheet('settings', 'Add your Gemini API key to start.', 'bad'); }, 400);
-      }
+      window.addEventListener('hashchange', checkIncomingAnswer);
       if ('serviceWorker' in navigator && location.protocol === 'https:') {
         navigator.serviceWorker.register('sw.js').catch(function () {});
       }
